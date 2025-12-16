@@ -38,7 +38,7 @@ export default function Home() {
 
   // Jika sudah login dan punya profil (atau jika belum login)
   return (
-    <main className="flex min-h-screen w-full flex-col bg-zinc-100 p-4 pt-3 md:p-3">
+    <main className="flex min-h-screen w-full flex-col bg-black p-4 pt-3 md:p-3">
       <div className="grid h-full flex-1 grid-cols-1 gap-3 md:grid-cols-2 lg:grid-rows-2">
         <ProfileCard profile={profile} />
         <ProjectCard />

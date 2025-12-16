@@ -4,7 +4,7 @@
 
 import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { WagmiProvider, Config } from "wagmi"; // Impor 'Config'
+import { WagmiProvider, Config } from "wagmi"; 
 import { base, baseSepolia } from "wagmi/chains"; 
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { useState, useEffect, ReactNode } from 'react';

@@ -41,7 +41,7 @@ const ActivityCard = () => {
           <h2 className="text-xl font-semibold text-zinc-900">Activity</h2>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-zinc-500">Please connect and log in.</p>
+          <p className="text-sm text-zinc-500">Please connect and log in to view or update your profile.</p>
         </div>
       </div>
     );

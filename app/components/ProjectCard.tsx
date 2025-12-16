@@ -7,6 +7,7 @@ import { useAnimationStore, Project } from '../lib/SessionProvider';
 import { ProjectModal } from './ProjectModal';
 import { resolveIpfsUrl } from '../lib/utils';
 
+// --- IKON ORIGINAL (Clean Style) ---
 const ProjectIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -25,70 +26,112 @@ const ProjectIcon = () => (
   </svg>
 );
 
-// --- Komponen Item Proyek (untuk daftar scrollable) ---
-const ProjectListItem = ({ project, onClick }: { project: Project, onClick: () => void }) => {
-  const mediaUrl = resolveIpfsUrl(project.mediaIpfsUrl) || project.mediaPreview;
+const ExternalLinkIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+
+// --- 1. KOMPONEN MEDIA (REUSABLE) ---
+const MediaRenderer = ({ 
+  src, 
+  alt, 
+  className 
+}: { 
+  src: string | null; 
+  alt: string; 
+  className?: string 
+}) => {
+  if (!src) {
+    return (
+      <div className={`flex items-center justify-center bg-zinc-100 ${className}`}>
+        <ProjectIcon />
+      </div>
+    );
+  }
+
+  const isVideo = 
+    src.startsWith('blob:video/') || 
+    src.startsWith('data:video/') || 
+    src.endsWith('.mp4') || 
+    src.endsWith('.webm');
+
+  if (isVideo) {
+    return (
+      <video 
+        src={src} 
+        className={`object-cover ${className}`} 
+        autoPlay 
+        muted 
+        loop 
+        playsInline
+      />
+    );
+  }
 
   return (
-    <button 
-      onClick={onClick}
-      className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-zinc-50 transition-colors group text-left"
-    >
-      <div className="w-16 h-10 rounded-md border border-zinc-200 bg-zinc-50 flex-shrink-0 overflow-hidden">
-        {mediaUrl ? ( 
-          mediaUrl.startsWith('data:image/') || mediaUrl.startsWith('blob:image/') ? (
-            <img src={mediaUrl} alt={project.name} className="w-full h-full object-cover" />
-          ) : (
-            <video src={mediaUrl} className="w-full h-full object-cover" autoPlay muted loop />
-          )
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-zinc-100 text-zinc-400">
-            <ProjectIcon />
-          </div>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-zinc-900 truncate">{project.name}</p>
-        <p className="text-xs text-zinc-500 truncate">{project.description || "No description"}</p>
-      </div>
-    </button>
+    <img 
+      src={src} 
+      alt={alt} 
+      className={`object-cover ${className}`} 
+      loading="lazy"
+    />
   );
 };
 
-// --- Komponen Proyek Unggulan (untuk grid) ---
-const FeaturedProjectItem = ({ project, onClick }: { project: Project, onClick: () => void }) => {
-  const mediaUrl = resolveIpfsUrl(project.mediaIpfsUrl) || project.mediaPreview;
+
+// --- 2. KOMPONEN ITEM PROYEK (KARTU HORIZONTAL - LIGHT THEME) ---
+const LightProjectItem = ({ 
+  project, 
+  onClick 
+}: { 
+  project: Project, 
+  onClick: () => void 
+}) => {
+  const mediaUrl = project.mediaPreview || resolveIpfsUrl(project.mediaIpfsUrl);
 
   return (
     <button 
       onClick={onClick}
-      className="rounded-lg border border-zinc-200 overflow-hidden flex flex-col group transition-all hover:shadow-md text-left"
+      className="group relative flex flex-col flex-shrink-0 w-72 h-full rounded-xl border bg-white text-left overflow-hidden"
     >
-      {/* Media */}
-      <div className="w-full h-32 bg-zinc-100 flex items-center justify-center overflow-hidden">
-        {mediaUrl ? ( 
-          mediaUrl.startsWith('data:image/') || mediaUrl.startsWith('blob:image/') ? (
-            <img src={mediaUrl} alt={project.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-          ) : (
-            <video src={mediaUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" autoPlay muted loop />
-          )
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-zinc-100 text-zinc-400">
-            <ProjectIcon />
-          </div>
-        )}
+      {/* Media Area */}
+      <div className="relative h-40 p-2 overflow-hidden">
+        <MediaRenderer 
+          src={mediaUrl} 
+          alt={project.name} 
+          className="w-full h-full rounded-xl" 
+        />
       </div>
-      {/* Konten */}
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold text-zinc-800 text-base">{project.name}</h3>
-        <p className="text-sm text-zinc-500 mt-1 flex-1">{project.description || "No description"}</p>
-        {/* Tags */}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {project.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">
+
+      {/* Content Area */}
+      <div className="flex flex-col flex-1 p-4">
+        <div className="flex justify-between items-start gap-2">
+          <h3 className="font-semibold text-zinc-900 text-base line-clamp-1 group-hover:text-sky-600 transition-colors">
+            {project.name}
+          </h3>
+          {project.projectUrl && <span className="text-zinc-400 mt-0.5"><ExternalLinkIcon /></span>}
+        </div>
+        
+        <p className="text-sm text-zinc-500 mt-2 line-clamp-2 text-black-subtleground leading-relaxed flex-1">
+          {project.description || "No description provided."}
+        </p>
+
+        {/* Footer: Tags (Original Style) */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          {project.tags.slice(0, 2).map(tag => (
+            <span 
+              key={tag} 
+              className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800"
+            >
               {tag}
             </span>
           ))}
+          {project.tags.length > 2 && (
+            <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500">
+              +{project.tags.length - 2}
+            </span>
+          )}
         </div>
       </div>
     </button>
@@ -96,7 +139,7 @@ const FeaturedProjectItem = ({ project, onClick }: { project: Project, onClick: 
 };
 
 
-// --- Komponen Komponen Utama ProjectCard ---
+// --- 3. KOMPONEN UTAMA (PROJECT CARD) ---
 const ProjectCard = () => {
   const { profile, isHydrated } = useAnimationStore();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -106,71 +149,51 @@ const ProjectCard = () => {
   }
 
   const allProjects = profile.projects || [];
-  const featuredProjects = allProjects.filter(p => p.isFeatured);
-  const otherProjects = allProjects.filter(p => !p.isFeatured);
 
   return (
     <>
-      {/* Render Modal di sini. Ia tersembunyi secara default */}
       <ProjectModal 
         project={selectedProject} 
         onClose={() => setSelectedProject(null)} 
       />
 
-      {/* Ini adalah kartu yang sudah ada */}
-      <div className="rounded-xl bg-white p-6 shadow-sm md:row-span-1 flex flex-col">
-        <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+      <div className="relative flex flex-col h-full rounded-xl bg-white shadow-sm md:row-span-1 overflow-hidden">
+        <div className="flex items-center gap-3 p-6 pb-2 flex-shrink-0">
           <ProjectIcon />
           <h2 className="text-xl font-semibold text-zinc-900">
             What I built
           </h2>
         </div>
 
-        {allProjects.length === 0 && (
-          <div className="flex-1 flex items-center justify-center">
-        <p className="text-sm text-zinc-500">No projects yet. Please add them from the settings page.</p>
-          </div>
-        )}
-
-        {featuredProjects.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 flex-shrink-0">
-            {featuredProjects.map(proj => (
-              <FeaturedProjectItem 
-                key={proj.id} 
-                project={proj} 
-                onClick={() => setSelectedProject(proj)} 
-              />
-            ))}
-          </div>
-        )}
-
-        {otherProjects.length > 0 && (
-          <div className="flex-1 flex flex-col min-h-0"> 
-            <h3 className="text-sm font-medium text-zinc-600 mb-2 border-t pt-4 flex-shrink-0">
-              Other Projects
-            </h3>
-            <div className="flex-1 overflow-y-auto max-h-48 pr-2"> 
-              <div className="flex flex-col divide-y divide-zinc-100">
-                {otherProjects.map(proj => (
-                  <ProjectListItem 
-                    key={proj.id} 
-                    project={proj} 
-                    onClick={() => setSelectedProject(proj)} 
-                  />
-                ))}
-              </div>
+        {/* Area Scroll Horizontal */}
+        <div className="flex-1 w-full overflow-hidden relative mt-2">
+          {allProjects.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center text-center p-6 text-zinc-500">
+              <p>No projects yet.</p>
+              <p className="text-xs opacity-50 mt-1">Please add them from the settings page.</p>
             </div>
-          </div>
-        )}
-
+          ) : (
+            // Scroll Container
+            <div className="absolute inset-0 flex items-center gap-4 px-6 overflow-x-auto pb-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300">
+              {allProjects.map((proj) => (
+                <LightProjectItem 
+                  key={proj.id} 
+                  project={proj} 
+                  onClick={() => setSelectedProject(proj)} 
+                />
+              ))}
+              <div className="w-2 flex-shrink-0" />
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
 };
 
-// --- Komponen Versi Statis (Fallback) ---
+// --- Fallback State (Static) ---
 const StaticProjectCard = () => (
-  <div className="rounded-xl bg-white p-6 shadow-sm md:row-span-1 flex flex-col">
+  <div className="rounded-xl bg-white p-6 shadow-sm md:row-span-1 flex flex-col h-full">
     <div className="flex items-center gap-3 flex-shrink-0">
       <ProjectIcon />
       <h2 className="text-xl font-semibold text-zinc-900">
