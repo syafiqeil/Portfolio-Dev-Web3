@@ -51,8 +51,8 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
     >
       {/* Konten Modal */}
       <div
-        onClick={(e) => e.stopPropagation()} // Mencegah modal tertutup saat diklik di dalam
-        className="relative w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()} 
+        className="relative w-full max-w-2xl bg-white rounded-sm shadow-xl overflow-hidden"
         style={{ animation: 'fadeIn 0.2s ease-out' }}
       >
         {/* Tombol Tutup */}
@@ -66,10 +66,10 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
         {/* Konten Media (Foto/Video) */}
         <div className="w-full h-64 md:h-96 bg-zinc-100">
-          {mediaUrl ? ( // Cek 'mediaUrl' (bukan project.mediaPreview)
+          {mediaUrl ? ( 
             isVideo ? (
               <video
-                src={mediaUrl} // Gunakan 'mediaUrl'
+                src={mediaUrl} 
                 className="w-full h-full object-contain"
                 autoPlay
                 controls
@@ -78,7 +78,7 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
               />
             ) : (
               <img
-                src={mediaUrl} // Gunakan 'mediaUrl'
+                src={mediaUrl} 
                 alt={project.name}
                 className="w-full h-full object-contain"
               />

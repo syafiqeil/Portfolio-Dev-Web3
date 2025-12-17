@@ -146,7 +146,7 @@ export default function ActivitySettingsPage() {
         </div>
         <div className="flex flex-col gap-4">
           {blogPosts.map(post => (
-            <div key={post.id} className="p-4 border rounded-xl bg-white flex gap-4 items-start">
+            <div key={post.id} className="p-4 border rounded-sm bg-white flex gap-4 items-start">
               {/* Image Preview */}
               <div 
                 onClick={() => triggerUpload(post.id, 'blog')}

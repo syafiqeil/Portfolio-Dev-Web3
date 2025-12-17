@@ -266,9 +266,12 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
         }
       `}</style>
 
-      <div className="relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm md:row-span-1 md:col-span-1">
-        <div className="relative h-32 w-full overflow-hidden bg-zinc-900">
-          <div className="absolute inset-0">{renderAnimation()}</div>
+      <div className="relative flex flex-col overflow-hidden rounded-sm bg-white shadow-sm md:row-span-1 md:col-span-1">
+        <div className="relative h-40 w-full md:h-48 overflow-hidden bg-zinc-900">
+          <div className="relative h-full w-full max-w-2xl mx-auto"> 
+            {renderAnimation()}
+          </div>
+
           <div className="absolute top-2 right-2 z-10">
             {renderAuthButton()}
           </div>
@@ -297,7 +300,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
          
           <div className="flex-grow" />
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-row gap-3">
             <a
               className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 ${!profile?.github ? 'pointer-events-none opacity-50' : ''}`}
               href={githubUrl} 

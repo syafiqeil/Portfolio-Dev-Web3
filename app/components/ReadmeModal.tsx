@@ -61,7 +61,7 @@ export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
       {/* Konten Modal */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl h-[80vh] bg-white rounded-xl shadow-xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-3xl h-[80vh] bg-white rounded-sm shadow-xl flex flex-col overflow-hidden"
         style={{ animation: 'fadeIn 0.2s ease-out' }}
       >
         {/* Header Modal */}

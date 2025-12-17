@@ -2,7 +2,7 @@
 
 "use client";
 
-import Link from 'next/link'; // Import Link untuk navigasi
+import Link from 'next/link'; 
 import { useState } from 'react';
 import { useAnimationStore } from '../lib/SessionProvider';
 import { resolveIpfsUrl } from '../lib/utils';
@@ -13,7 +13,7 @@ const ActivityIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" he
 const MailIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>;
 const ArrowRightIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
 
-// Social Icons Component (Sama seperti sebelumnya)
+// Social Icons Component 
 const SocialIcon = ({ platform }: { platform: string }) => {
   const p = platform.toLowerCase();
   if (p.includes('twitter') || p.includes('x.com')) return ( <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg> );
@@ -35,10 +35,10 @@ const ActivityCard = () => {
 
   if (!isHydrated || !profile) {
     return (
-      <div className="rounded-xl bg-white p-6 shadow-sm md:col-span-2 flex flex-col">
+      <div className="rounded-sm bg-white p-6 shadow-sm md:col-span-2 flex flex-col">
         <div className="flex justify-start gap-3 flex-shrink-0">
           <ActivityIcon />
-          <h2 className="text-xl font-semibold text-zinc-900">Activity</h2>
+          <h2 className="text-sm font-semibold text-zinc-900">Activity</h2>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-zinc-500">Please connect and log in to view or update your profile.</p>
@@ -54,7 +54,7 @@ const ActivityCard = () => {
         onClose={() => setSelectedCert(null)} 
       />
 
-      <div className="rounded-xl bg-white p-6 shadow-sm md:col-span-2">
+      <div className="rounded-sm bg-white p-6 shadow-sm md:col-span-2">
         <div className="flex items-center gap-3 mb-6">
           <ActivityIcon />
           <h2 className="text-xl font-semibold text-zinc-900">Activity</h2>
@@ -82,7 +82,7 @@ const ActivityCard = () => {
                       className="group flex gap-4 p-3 border rounded-sm hover:bg-zinc-50 transition-all"
                     >
                       {/* Gambar di Kiri */}
-                      <div className="w-28 h-24 sm:w-32 sm:h-24 flex-shrink-0 bg-zinc-100 overflow-hidden border border-zinc-200 rounded-sm">
+                      <div className="w-28 h-24 sm:w-32 sm:h-24 flex-shrink-0 bg-zinc-100 overflow-hidden border rounded-sm">
                         {(() => {
                           const imgSrc = resolveIpfsUrl(post.coverImage);
                           return imgSrc ? (
@@ -121,56 +121,88 @@ const ActivityCard = () => {
             )}
           </div>       
 
-            {/* --- 2. CERTIFICATES --- */}
-            <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Certificates</h3>
-              {certificates.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {certificates.slice(0, 4).map(cert => (
-                    <button 
-                      key={cert.id} 
-                      onClick={() => setSelectedCert(cert)}
-                      className="group relative aspect-[4/3] w-full overflow-hidden border rounded-sm hover:shadow-md transition-all cursor-pointer"
-                    >
-                      {(() => {
-                        const imgSrc = resolveIpfsUrl(cert.imageUrl);
-                        return imgSrc ? (
-                          <img src={imgSrc} alt={cert.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                        ) : (
-                          <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-300 text-[10px]">IMG</div>
-                        );
-                      })()}
-                      <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                        <p className="text-white text-[10px] font-medium text-center line-clamp-1">{cert.title}</p>
+          {/* --- 2. CERTIFICATES (WEB3 STYLE) --- */}
+          <div className="flex flex-col gap-3 min-h-0">
+            <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Certificates</h3>
+              
+            {certificates.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 content-start">
+                {certificates.slice(0, 4).map(cert => (
+                  <button 
+                    key={cert.id} 
+                    onClick={() => setSelectedCert(cert)}
+                    className="group relative aspect-video w-full overflow-hidden rounded-sm bg-zinc-900 border border-zinc-200/50 hover:border-purple-500/50 transition-all duration-300 shadow-sm hover:shadow-purple-500/20"
+                  >
+                    {(() => {
+                      const imgSrc = resolveIpfsUrl(cert.imageUrl);
+                      return imgSrc ? (
+                        <>
+                          <img 
+                            src={imgSrc} 
+                            alt={cert.title} 
+                            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" 
+                          />
+                          {/* Dark Gradient Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 text-[10px] bg-zinc-900">
+                          <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center mb-1">
+                              <span className="text-white/20">NFT</span>
+                          </div>
+                          No Asset
+                        </div>
+                      );
+                    })()}
+                      
+                    {/* Floating Info (Web3 Style) */}
+                    <div className="absolute bottom-0 inset-x-0 p-2 transform translate-y-1 group-hover:translate-y-0 transition-transform">
+                      <div className="flex items-center gap-1.5">
+                        {/* "Token" Icon */}
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.8)]" />
+                        <p className="text-white text-[10px] font-medium tracking-wide truncate">
+                          {cert.title || "UNTITLED"}
+                        </p>
                       </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="h-24 border border-dashed border-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs">No certificates.</div>
-              )}
-            </div>
+                    </div>
 
-            {/* --- 3. CONNECT --- */}
-            <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Connect</h3>
-              <div className="flex flex-col gap-2">
-                {contactEmail && (
-                  <a href={`mailto:${contactEmail}`} className="flex items-center gap-3 p-2 border rounded-sm hover:bg-zinc-50 transition-colors group">
-                    <div className="text-zinc-400 group-hover:text-zinc-900"><MailIcon /></div>
-                    <span className="text-sm text-zinc-600 truncate">{contactEmail}</span>
-                  </a>
-                )}
-                {socialLinks.map(link => (
-                  <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 border rounded-sm hover:bg-zinc-50 transition-colors group">
-                    <div className="text-zinc-400 group-hover:text-zinc-900"><SocialIcon platform={link.platform} /></div>
-                    <span className="text-sm text-zinc-600 capitalize">{link.platform}</span>
-                  </a>
+                    {/* Glass Shine Effect on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  </button>
+                ))}
+                  
+                {/* Fill empty slots with placeholders */}
+                {certificates.length < 4 && Array.from({ length: 4 - certificates.length }).map((_, i) => (
+                   <div key={i} className="aspect-video rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 flex items-center justify-center">
+                      <span className="text-zinc-300 text-[10px]">Empty Slot</span>
+                   </div>
                 ))}
               </div>
+            ) : (
+              <div className="h-full border border-dashed border-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs">No certificates.</div>
+            )}
+          </div>
+
+          {/* --- 3. CONNECT --- */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Connect</h3>
+            <div className="flex flex-col gap-2">
+              {contactEmail && (
+                <a href={`mailto:${contactEmail}`} className="flex items-center gap-3 p-2 border rounded-sm hover:bg-zinc-50 transition-colors group">
+                  <div className="text-zinc-400 group-hover:text-zinc-900"><MailIcon /></div>
+                  <span className="text-sm text-zinc-600 truncate">{contactEmail}</span>
+                </a>
+              )}
+              {socialLinks.map(link => (
+                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2 border rounded-sm hover:bg-zinc-50 transition-colors group">
+                  <div className="text-zinc-400 group-hover:text-zinc-900"><SocialIcon platform={link.platform} /></div>
+                  <span className="text-sm text-zinc-600 capitalize">{link.platform}</span>
+                </a>
+              ))}
             </div>
           </div>
         </div>
+      </div>
     </>
   );
 };

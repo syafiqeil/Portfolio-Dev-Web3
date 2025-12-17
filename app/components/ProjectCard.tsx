@@ -80,7 +80,7 @@ const MediaRenderer = ({
 };
 
 
-// --- 2. KOMPONEN ITEM PROYEK (KARTU HORIZONTAL - LIGHT THEME) ---
+// --- 2. KOMPONEN ITEM PROYEK ---
 const LightProjectItem = ({ 
   project, 
   onClick 
@@ -93,14 +93,14 @@ const LightProjectItem = ({
   return (
     <button 
       onClick={onClick}
-      className="group relative flex flex-col flex-shrink-0 w-72 h-full rounded-xl border bg-white text-left overflow-hidden"
+      className="group relative flex flex-col flex-shrink-0 w-72 h-full rounded-sm border bg-white text-left overflow-hidden"
     >
       {/* Media Area */}
       <div className="relative h-40 p-2 overflow-hidden">
         <MediaRenderer 
           src={mediaUrl} 
           alt={project.name} 
-          className="w-full h-full rounded-xl" 
+          className="w-full h-full border rounded-sm" 
         />
       </div>
 
@@ -157,7 +157,7 @@ const ProjectCard = () => {
         onClose={() => setSelectedProject(null)} 
       />
 
-      <div className="relative flex flex-col h-full rounded-xl bg-white shadow-sm md:row-span-1 overflow-hidden">
+      <div className="relative flex flex-col h-full rounded-sm bg-white shadow-sm md:row-span-1 overflow-hidden">
         <div className="flex items-center gap-3 p-6 pb-2 flex-shrink-0">
           <ProjectIcon />
           <h2 className="text-xl font-semibold text-zinc-900">
@@ -193,7 +193,7 @@ const ProjectCard = () => {
 
 // --- Fallback State (Static) ---
 const StaticProjectCard = () => (
-  <div className="rounded-xl bg-white p-6 shadow-sm md:row-span-1 flex flex-col h-full">
+  <div className="rounded-sm bg-white p-6 shadow-sm md:row-span-1 flex flex-col h-full">
     <div className="flex items-center gap-3 flex-shrink-0">
       <ProjectIcon />
       <h2 className="text-xl font-semibold text-zinc-900">
