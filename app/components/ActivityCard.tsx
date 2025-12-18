@@ -9,9 +9,68 @@ import { resolveIpfsUrl } from '../lib/utils';
 import { CertificateModal } from './CertificateModal';
 
 // Icons
-const ActivityIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>;
-const MailIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>;
-const ArrowRightIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>;
+const CalendarIcon = () => (
+  <svg 
+    width="12" 
+    height="12" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+const ActivityIcon = () => 
+<svg xmlns="http://www.w3.org/2000/svg" 
+  width="20" height="20" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="currentColor" 
+  strokeWidth="2" 
+  strokeLinecap="round" 
+  strokeLinejoin="round"
+>
+  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+</svg>;
+const MailIcon = () => 
+<svg 
+  width="16" 
+  height="16" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="currentColor" 
+  strokeWidth="2">
+  <rect 
+    width="20" 
+    height="16" 
+    x="2" 
+    y="4" 
+    rx="2" />
+  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+</svg>;
+const ArrowRightIcon = () => 
+<svg 
+  width="14" 
+  height="14" 
+  viewBox="0 0 24 24" 
+  fill="none" 
+  stroke="currentColor" 
+  strokeWidth="2" 
+  strokeLinecap="round" 
+  strokeLinejoin="round">
+  <line 
+    x1="5" 
+    y1="12" 
+    x2="19" 
+    y2="12" />
+  <polyline points="12 5 19 12 12 19" />
+</svg>;
 
 // Social Icons Component 
 const SocialIcon = ({ platform }: { platform: string }) => {
@@ -54,68 +113,69 @@ const ActivityCard = () => {
         onClose={() => setSelectedCert(null)} 
       />
 
-      <div className="rounded-sm bg-white p-6 shadow-sm md:col-span-2">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="rounded-xl bg-white p-6 shadow-sm md:col-span-2 h-full flex flex-col overflow-hidden">
+        <div className="flex items-center gap-3 mb-4 flex-shrink-0">
           <ActivityIcon />
           <h2 className="text-xl font-semibold text-zinc-900">Activity</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* --- 1. BLOGS --- */}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">Latest Blog</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full min-h-0">
+          {/* --- 1. BLOGS  --- */}
+          <div className="flex flex-col gap-3 min-h-0 pr-1">
+            <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider sticky top-0 bg-white z-10">Latest Blog</h3>
             
             {blogPosts.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {blogPosts.map(post => {
-                  // Logika Preview Teks
-                  // Prioritas: Deskripsi -> Konten -> Placeholder
+              <div className="flex flex-col gap-4"> 
+                {blogPosts.slice(0, 3).map(post => {
+                  
+                  // 1. Perbanyak batas karakter dari 80 ke 120 agar cukup untuk 3 baris
                   const rawText = post.description || post.content || "No description available.";
-                  // Ambil 120 karakter pertama
                   const previewText = rawText.length > 120 ? rawText.substring(0, 120) + "..." : rawText;
 
                   return (
                     <Link 
                       key={post.id} 
                       href={`/blog/${post.id}`}
-                      className="group flex gap-4 p-3 border rounded-sm hover:bg-zinc-50 transition-all"
+                      // 2. Ubah p-2 menjadi p-3 atau p-4 agar kartu lebih tinggi (lebih 'gemuk')
+                      className="group flex gap-4 p-4 border rounded-lg hover:bg-zinc-50 transition-all items-start"
                     >
-                      {/* Gambar di Kiri */}
-                      <div className="w-28 h-24 sm:w-32 sm:h-24 flex-shrink-0 bg-zinc-100 overflow-hidden border rounded-sm">
+                      {/* Gambar sedikit dibesarkan jika perlu, atau biarkan w-20 h-20 */}
+                      <div className="w-20 h-20 flex-shrink-0 bg-zinc-100 overflow-hidden border border-zinc-200 rounded-md">
                         {(() => {
                           const imgSrc = resolveIpfsUrl(post.coverImage);
                           return imgSrc ? (
                             <img src={imgSrc} alt={post.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-zinc-300 text-xs">No Img</div>
+                            <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[10px]">No Img</div>
                           );
                         })()}
                       </div>
 
-                      {/* Teks di Kanan */}
-                      <div className="flex flex-col justify-between flex-1 py-1">
+                      <div className="flex flex-col min-w-0 h-full justify-between">
                         <div>
                           {post.date && (
-                            <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+                            <div className="flex items-center gap-1 text-[10px] text-zinc-400 mb-1">
                               <CalendarIcon />
                               <span>{post.date}</span>
                             </div>
                           )}
-                          <h4 className="font-semibold text-zinc-900 leading-tight line-clamp-2">
-                            {post.title || "Untitled Post"}
+                          <h4 className="font-semibold text-zinc-900 text-sm leading-tight line-clamp-1 mb-1">
+                            {post.title || "Untitled"}
                           </h4>
-                          <p className="text-sm text-zinc-500 mt-2 line-clamp-2 leading-relaxed">
-                            {previewText}
-                          </p>
                         </div>
+                        
+                        {/* 3. KUNCI UTAMA: Ubah line-clamp-2 menjadi line-clamp-3 */}
+                        {/* Ini akan memaksa teks mengisi ruang vertikal lebih banyak */}
+                        <p className="text-xs text-zinc-500 line-clamp-3 leading-relaxed">
+                          {previewText}
+                        </p>
                       </div>
                     </Link>
                   );
                 })}
               </div>
             ) : (
-              <div className="h-32 border border-dashed border-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-sm">
+              <div className="h-24 border border-dashed border-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs">
                 No blogs posted yet.
               </div>
             )}

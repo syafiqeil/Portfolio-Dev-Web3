@@ -51,6 +51,10 @@ export default function ActivitySettingsPage() {
 
   // --- Handlers Blog ---
   const addBlogPost = () => {
+    if (blogPosts.length >= 3) {
+      alert("Maximum 3 blog posts allowed.");
+      return;
+    }
     const today = new Date().toLocaleDateString('en-GB', {
       day: 'numeric', month: 'short', year: 'numeric'
     });
@@ -66,6 +70,7 @@ export default function ActivitySettingsPage() {
       }
     ]);
   };
+
   const updateBlogPost = (id: string, field: keyof BlogPost, value: any) => {
     setBlogPosts(posts => posts.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
@@ -75,8 +80,13 @@ export default function ActivitySettingsPage() {
 
   // --- Handlers Certificate ---
   const addCertificate = () => {
+    if (certificates.length >= 4) {
+      alert("Maximum 4 certificates allowed.");
+      return;
+    }
     setCertificates([...certificates, { id: `cert_${Date.now()}`, title: '', imageUrl: null }]);
   };
+
   const updateCertificate = (id: string, field: keyof Certificate, value: any) => {
     setCertificates(certs => certs.map(c => c.id === id ? { ...c, [field]: value } : c));
   };
