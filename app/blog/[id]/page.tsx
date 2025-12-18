@@ -57,7 +57,7 @@ export default function BlogDetailPage() {
             {post.title}
           </h1>
           
-          {/* Tanggal (Metadata) - Dipindah ke sini agar lebih rapi */}
+          {/* Tanggal (Metadata) */}
           {post.date && (
             <div className="flex items-center gap-2 text-zinc-500 text-sm font-medium">
               <CalendarIcon />

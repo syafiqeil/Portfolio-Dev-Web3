@@ -90,7 +90,7 @@ export interface Certificate {
   title: string;
   imageUrl?: string | null;
   pendingImageFile?: File | null;
-  credentialUrl?: string; // Link verifikasi 
+  credentialUrl?: string; 
 }
 
 // 2. Perbarui Interface Profile
@@ -338,7 +338,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   // --- Fungsi Logout ---
   const logout = useCallback(async () => {
     if (address) {
-      localStorage.removeItem(`draftProfile_${address}`); // Hapus draf
+      localStorage.removeItem(`draftProfile_${address}`);
     }
     setIsAuthenticated(false);
     setProfile(null); 
@@ -367,8 +367,6 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     saveDraft({ animation: newAnimation });
   }, [saveDraft]);
   const activeAnimation = profile?.animation || DEFAULTS.animation;
-
-  // ... (Fungsi uploadFileToApi dan uploadJsonToApi tetap sama) ...
   const uploadFileToApi = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -401,9 +399,9 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (!profile || !address) return alert("Profile has not been loaded.");
     
     setIsPublishing(true);
-    let dataToUpload = JSON.parse(JSON.stringify(profile)); // Deep copy
+    let dataToUpload = JSON.parse(JSON.stringify(profile)); 
 
-    // --- FUNGSI HELPER BARU: Konversi data:url ke File ---
+    // --- FUNGSI HELPER Konversi data:url ke File ---
     const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File | null> => {
       try {
         const res = await fetch(dataUrl);
@@ -529,7 +527,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     isAuthenticated,
     isLoading,
     isProfileLoading,
-    profile, // Ini adalah 'draftProfile'
+    profile, 
     login,
     logout,
     saveDraft, 
@@ -537,10 +535,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     setActiveAnimation,
     extensions,
     addExtension,
-    isHydrated: !isLoading && !isProfileLoading, // Definisikan isHydrated
+    isHydrated: !isLoading && !isProfileLoading, 
     isPublishing,
     publishChangesToOnChain,
-    hasUnpublishedChanges, // Kirim status ini ke UI
+    hasUnpublishedChanges, 
 
     // Fungsi internal
     _setProfile: setProfile,

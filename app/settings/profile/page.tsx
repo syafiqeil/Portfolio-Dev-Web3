@@ -1,6 +1,7 @@
 // app/settings/profile/page.tsx
 
 "use client";
+
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useAnimationStore } from '@/app/lib/useAnimationStore'; 
 import { useRouter } from 'next/navigation';
@@ -366,7 +367,6 @@ export default function ProfileSettingsPage() {
         )}
       </section>
 
-      {/* Garis pemisah */}
       <hr className="my-4 border-zinc-200" />
 
       {/* Bagian 5: Disconnect */}

@@ -1,4 +1,5 @@
 // app/components/ReadmeModal.tsx
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,7 +7,6 @@ import { resolveIpfsUrl } from "../lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-// Ikon X untuk menutup
 const XIcon = () => (
   <svg
     width="24"
@@ -60,10 +60,9 @@ export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
     };
 
     fetchReadmeContent();
-  }, [readmeUrl]); // Jalankan efek ini setiap kali readmeUrl berubah
+  }, [readmeUrl]); 
 
   return (
-    // Lapisan Latar Belakang (Backdrop)
     <div
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -86,7 +85,7 @@ export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
           </button>
         </div>
 
-        {/* Konten Markdown (Scrollable) */}
+        {/* Konten Markdown */}
         <div className="flex-1 p-6 overflow-y-auto markdown-content">
           {isLoading ? (
             <p className="text-zinc-500">Loading content...</p>
@@ -95,8 +94,6 @@ export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
           )}
         </div>
       </div>
-
-      {/* CSS untuk animasi & styling dasar markdown */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: scale(0.95); }

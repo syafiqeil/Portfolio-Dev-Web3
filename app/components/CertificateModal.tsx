@@ -6,7 +6,6 @@ import React from 'react';
 import { Certificate } from '../lib/SessionProvider'; 
 import { resolveIpfsUrl } from '../lib/utils';
 
-// Ikon X untuk menutup
 const XIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -24,18 +23,15 @@ export const CertificateModal = ({ certificate, onClose }: CertificateModalProps
   const imageUrl = resolveIpfsUrl(certificate.imageUrl);
  
   return (
-    // Backdrop Blur
     <div
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
       style={{ animation: 'fadeIn 0.2s ease-out' }}
     >
-      {/* Container Modal */}
       <div
-        onClick={(e) => e.stopPropagation()} // Mencegah tutup saat klik gambar
+        onClick={(e) => e.stopPropagation()} 
         className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center"
       >
-        {/* Tombol Tutup */}
         <button
           onClick={onClose}
           className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors bg-white/10 rounded-full p-2"
@@ -43,8 +39,6 @@ export const CertificateModal = ({ certificate, onClose }: CertificateModalProps
         >
           <XIcon />
         </button>
-
-        {/* Gambar Full */}
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -57,7 +51,6 @@ export const CertificateModal = ({ certificate, onClose }: CertificateModalProps
           </div>
         )}
 
-        {/* Judul di bawah modal (opsional, jika ingin info tambahan) */}
         <h3 className="mt-4 text-white text-xl font-medium text-center">
           {certificate.title}
         </h3>

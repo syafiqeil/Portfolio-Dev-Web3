@@ -238,7 +238,7 @@ const ActivityCard = () => {
             )}
           </div>
 
-          {/* --- 2. CERTIFICATES (WEB3 STYLE) --- */}
+          {/* --- 2. CERTIFICATES --- */}
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">
               Certificates

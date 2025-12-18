@@ -6,7 +6,6 @@ import React from "react";
 import { Project } from "../lib/SessionProvider";
 import { resolveIpfsUrl } from "../lib/utils";
 
-// Ikon X untuk menutup
 const XIcon = () => (
   <svg
     width="24"
@@ -23,7 +22,6 @@ const XIcon = () => (
   </svg>
 );
 
-// Ikon Link Eksternal
 const ExternalLinkIcon = () => (
   <svg
     width="16"
@@ -65,7 +63,6 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
       mediaUrl.endsWith(".mov"));
 
   return (
-    // Lapisan Latar Belakang (Backdrop)
     <div
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -76,7 +73,6 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         className="relative w-full max-w-2xl bg-white rounded-md shadow-xl overflow-hidden"
         style={{ animation: "fadeIn 0.2s ease-out" }}
       >
-        {/* Tombol Tutup */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-10 text-zinc-500 hover:text-zinc-900 bg-white/50 rounded-full p-1"
@@ -147,8 +143,6 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           </div>
         </div>
       </div>
-
-      {/* CSS untuk animasi fade-in */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: scale(0.95); }

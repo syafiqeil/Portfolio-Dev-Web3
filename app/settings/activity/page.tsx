@@ -160,7 +160,6 @@ export default function ActivitySettingsPage() {
     ]);
   };
   const updateSocialLink = (id: string, url: string) => {
-    // Deteksi platform sederhana
     let platform = "website";
     if (url.includes("twitter.com") || url.includes("x.com"))
       platform = "twitter";
