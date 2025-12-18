@@ -68,7 +68,7 @@ export default function BlogDetailPage() {
 
         {/* Gambar Cover */}
         {coverImageUrl && (
-          <div className="w-full aspect-video rounded-sm overflow-hidden mb-10 bg-zinc-50 border border-zinc-200">
+          <div className="w-full aspect-video rounded-md overflow-hidden mb-10 bg-zinc-50 border border-zinc-200">
             <img 
               src={coverImageUrl} 
               alt={post.title} 

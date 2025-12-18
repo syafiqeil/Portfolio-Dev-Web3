@@ -2,10 +2,10 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useAnimationStore, Project } from '../lib/SessionProvider'; 
-import { ProjectModal } from './ProjectModal';
-import { resolveIpfsUrl } from '../lib/utils';
+import { useState } from "react";
+import { useAnimationStore, Project } from "../lib/SessionProvider";
+import { ProjectModal } from "./ProjectModal";
+import { resolveIpfsUrl } from "../lib/utils";
 
 // --- IKON ORIGINAL (Clean Style) ---
 const ProjectIcon = () => (
@@ -27,80 +27,92 @@ const ProjectIcon = () => (
 );
 
 const ExternalLinkIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
   </svg>
 );
 
 // --- 1. KOMPONEN MEDIA (REUSABLE) ---
-const MediaRenderer = ({ 
-  src, 
-  alt, 
-  className 
-}: { 
-  src: string | null; 
-  alt: string; 
-  className?: string 
+const MediaRenderer = ({
+  src,
+  alt,
+  className,
+}: {
+  src: string | null;
+  alt: string;
+  className?: string;
 }) => {
   if (!src) {
     return (
-      <div className={`flex items-center justify-center bg-zinc-100 ${className}`}>
+      <div
+        className={`flex items-center justify-center bg-zinc-100 ${className}`}
+      >
         <ProjectIcon />
       </div>
     );
   }
 
-  const isVideo = 
-    src.startsWith('blob:video/') || 
-    src.startsWith('data:video/') || 
-    src.endsWith('.mp4') || 
-    src.endsWith('.webm');
+  const isVideo =
+    src.startsWith("blob:video/") ||
+    src.startsWith("data:video/") ||
+    src.endsWith(".mp4") ||
+    src.endsWith(".webm");
 
   if (isVideo) {
     return (
-      <video 
-        src={src} 
-        className={`object-cover ${className}`} 
-        autoPlay 
-        muted 
-        loop 
+      <video
+        src={src}
+        className={`object-cover ${className}`}
+        autoPlay
+        muted
+        loop
         playsInline
       />
     );
   }
 
   return (
-    <img 
-      src={src} 
-      alt={alt} 
-      className={`object-cover ${className}`} 
+    <img
+      src={src}
+      alt={alt}
+      className={`object-cover ${className}`}
       loading="lazy"
     />
   );
 };
 
-
 // --- 2. KOMPONEN ITEM PROYEK ---
-const LightProjectItem = ({ 
-  project, 
-  onClick 
-}: { 
-  project: Project, 
-  onClick: () => void 
+const LightProjectItem = ({
+  project,
+  onClick,
+}: {
+  project: Project;
+  onClick: () => void;
 }) => {
   const mediaUrl = project.mediaPreview || resolveIpfsUrl(project.mediaIpfsUrl);
 
   return (
-    <button 
+    <button
       onClick={onClick}
-      className="group relative flex flex-col flex-shrink-0 w-72 h-full rounded-sm border bg-white text-left overflow-hidden"
+      className="group relative flex flex-col flex-shrink-0 w-72 h-full hover:bg-zinc-100 transition-all rounded-md border bg-white text-left overflow-hidden"
     >
       {/* Media Area */}
       <div className="relative h-40 p-2 overflow-hidden">
-        <MediaRenderer 
-          src={mediaUrl} 
-          alt={project.name} 
-          className="w-full h-full border rounded-sm" 
+        <MediaRenderer
+          src={mediaUrl}
+          alt={project.name}
+          className="w-full h-full flex-shrink-0 bg-zinc-100 overflow-hidden transition-colors border border-zinc-200 group-hover:border-zinc-700 rounded-md"
         />
       </div>
 
@@ -110,18 +122,22 @@ const LightProjectItem = ({
           <h3 className="font-semibold text-zinc-900 text-base line-clamp-1 group-hover:text-sky-600 transition-colors">
             {project.name}
           </h3>
-          {project.projectUrl && <span className="text-zinc-400 mt-0.5"><ExternalLinkIcon /></span>}
+          {project.projectUrl && (
+            <span className="text-zinc-400 mt-0.5">
+              <ExternalLinkIcon />
+            </span>
+          )}
         </div>
-        
+
         <p className="text-sm text-zinc-500 mt-2 line-clamp-2 text-black-subtleground leading-relaxed flex-1">
           {project.description || "No description provided."}
         </p>
 
         {/* Footer: Tags (Original Style) */}
         <div className="mt-4 flex flex-wrap gap-2">
-          {project.tags.slice(0, 2).map(tag => (
-            <span 
-              key={tag} 
+          {project.tags.slice(0, 2).map((tag) => (
+            <span
+              key={tag}
               className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800"
             >
               {tag}
@@ -138,12 +154,11 @@ const LightProjectItem = ({
   );
 };
 
-
 // --- 3. KOMPONEN UTAMA (PROJECT CARD) ---
 const ProjectCard = () => {
   const { profile, isHydrated } = useAnimationStore();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  
+
   if (!isHydrated || !profile) {
     return <StaticProjectCard />;
   }
@@ -152,17 +167,15 @@ const ProjectCard = () => {
 
   return (
     <>
-      <ProjectModal 
-        project={selectedProject} 
-        onClose={() => setSelectedProject(null)} 
+      <ProjectModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
       />
 
-      <div className="relative flex flex-col h-full rounded-sm bg-white shadow-sm md:row-span-1 overflow-hidden">
+      <div className="relative flex flex-col h-full rounded-md bg-white shadow-sm md:row-span-1 overflow-hidden">
         <div className="flex items-center gap-3 p-6 pb-2 flex-shrink-0">
           <ProjectIcon />
-          <h2 className="text-xl font-semibold text-zinc-900">
-            What I built
-          </h2>
+          <h2 className="text-xl font-semibold text-zinc-900">What I built</h2>
         </div>
 
         {/* Area Scroll Horizontal */}
@@ -170,16 +183,18 @@ const ProjectCard = () => {
           {allProjects.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center p-6 text-zinc-500">
               <p>No projects yet.</p>
-              <p className="text-xs opacity-50 mt-1">Please add them from the settings page.</p>
+              <p className="text-xs opacity-50 mt-1">
+                Please add them from the settings page.
+              </p>
             </div>
           ) : (
             // Scroll Container
             <div className="absolute inset-0 flex items-center gap-4 px-6 overflow-x-auto pb-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200 hover:scrollbar-thumb-zinc-300">
               {allProjects.map((proj) => (
-                <LightProjectItem 
-                  key={proj.id} 
-                  project={proj} 
-                  onClick={() => setSelectedProject(proj)} 
+                <LightProjectItem
+                  key={proj.id}
+                  project={proj}
+                  onClick={() => setSelectedProject(proj)}
                 />
               ))}
               <div className="w-2 flex-shrink-0" />
@@ -193,15 +208,15 @@ const ProjectCard = () => {
 
 // --- Fallback State (Static) ---
 const StaticProjectCard = () => (
-  <div className="rounded-sm bg-white p-6 shadow-sm md:row-span-1 flex flex-col h-full">
+  <div className="rounded-md bg-white p-6 shadow-sm md:row-span-1 flex flex-col h-full">
     <div className="flex items-center gap-3 flex-shrink-0">
       <ProjectIcon />
-      <h2 className="text-xl font-semibold text-zinc-900">
-        What I built
-      </h2>
+      <h2 className="text-xl font-semibold text-zinc-900">What I built</h2>
     </div>
     <div className="flex-1 flex items-center justify-center">
-      <p className="text-sm text-zinc-500">Please connect and log in to view or update your profile.</p>
+      <p className="text-sm text-zinc-500">
+        Please connect and log in to view or update your profile.
+      </p>
     </div>
   </div>
 );

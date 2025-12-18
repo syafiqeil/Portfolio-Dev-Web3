@@ -1,15 +1,25 @@
 // app/components/ReadmeModal.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { resolveIpfsUrl } from '../lib/utils';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import React, { useState, useEffect } from "react";
+import { resolveIpfsUrl } from "../lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Ikon X untuk menutup
 const XIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
@@ -19,7 +29,7 @@ interface ReadmeModalProps {
 }
 
 export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -61,8 +71,8 @@ export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
       {/* Konten Modal */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl h-[80vh] bg-white rounded-sm shadow-xl flex flex-col overflow-hidden"
-        style={{ animation: 'fadeIn 0.2s ease-out' }}
+        className="relative w-full max-w-3xl h-[80vh] bg-white rounded-md shadow-xl flex flex-col overflow-hidden"
+        style={{ animation: "fadeIn 0.2s ease-out" }}
       >
         {/* Header Modal */}
         <div className="flex items-center justify-between p-4">
@@ -81,13 +91,11 @@ export const ReadmeModal = ({ readmeUrl, onClose }: ReadmeModalProps) => {
           {isLoading ? (
             <p className="text-zinc-500">Loading content...</p>
           ) : (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {content}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           )}
         </div>
       </div>
-      
+
       {/* CSS untuk animasi & styling dasar markdown */}
       <style>{`
         @keyframes fadeIn {

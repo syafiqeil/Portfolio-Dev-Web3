@@ -1,14 +1,14 @@
 // app/componentsProfileCard.tsx
 
-"use client"; 
+"use client";
 
-import Link from 'next/link'; 
-import { useState } from 'react';
-import { useAnimationStore, Profile } from '../lib/SessionProvider'; 
-import { ConnectButton } from '@rainbow-me/rainbowkit'; 
-import { useAccount } from 'wagmi';
-import { resolveIpfsUrl } from '../lib/utils';
-import { ReadmeModal } from './ReadmeModal';
+import Link from "next/link";
+import { useState } from "react";
+import { useAnimationStore, Profile } from "../lib/SessionProvider";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+import { resolveIpfsUrl } from "../lib/utils";
+import { ReadmeModal } from "./ReadmeModal";
 
 // --- Komponen Ikon ---
 const GithubIcon = () => (
@@ -50,15 +50,18 @@ const DinoAnimation = () => (
     <div className="absolute bottom-4 left-0 w-full h-px bg-white/50" />
     <div
       className="absolute bottom-4 left-8 w-5 h-5 bg-white"
-      style={{ animation: 'dino-jump 1s infinite' }}
+      style={{ animation: "dino-jump 1s infinite" }}
     />
     <div
       className="absolute bottom-4 left-0 w-2 h-4 bg-white"
-      style={{ animation: 'cactus-move 2s infinite linear' }}
+      style={{ animation: "cactus-move 2s infinite linear" }}
     />
     <div
       className="absolute bottom-4 left-0 w-3 h-6 bg-white"
-      style={{ animation: 'cactus-move 2s infinite linear', animationDelay: '-1s' }}
+      style={{
+        animation: "cactus-move 2s infinite linear",
+        animationDelay: "-1s",
+      }}
     />
   </div>
 );
@@ -68,11 +71,11 @@ const WalkerBirdAnimation = () => (
   <div className="relative w-full h-full text-white">
     <div
       className="absolute top-1/2 left-1/4 w-3 h-3 bg-yellow-300"
-      style={{ animation: 'bird-flap 0.5s infinite alternate' }}
+      style={{ animation: "bird-flap 0.5s infinite alternate" }}
     />
     <div
       className="absolute bottom-4 left-0 w-4 h-6 bg-sky-400"
-      style={{ animation: 'walker-walk 4s infinite alternate ease-in-out' }}
+      style={{ animation: "walker-walk 4s infinite alternate ease-in-out" }}
     />
   </div>
 );
@@ -85,8 +88,8 @@ const OrbsAnimation = () => (
       style={{
         width: 30,
         height: 30,
-        left: '10%',
-        animation: 'orb-float 6s infinite alternate',
+        left: "10%",
+        animation: "orb-float 6s infinite alternate",
       }}
     />
     <div
@@ -94,9 +97,9 @@ const OrbsAnimation = () => (
       style={{
         width: 15,
         height: 15,
-        left: '30%',
-        animation: 'orb-float 8s infinite alternate',
-        animationDelay: '-2s',
+        left: "30%",
+        animation: "orb-float 8s infinite alternate",
+        animationDelay: "-2s",
       }}
     />
     <div
@@ -104,9 +107,9 @@ const OrbsAnimation = () => (
       style={{
         width: 40,
         height: 40,
-        left: '60%',
-        animation: 'orb-float 7s infinite alternate',
-        animationDelay: '-4s',
+        left: "60%",
+        animation: "orb-float 7s infinite alternate",
+        animationDelay: "-4s",
       }}
     />
     <div
@@ -114,9 +117,9 @@ const OrbsAnimation = () => (
       style={{
         width: 20,
         height: 20,
-        left: '80%',
-        animation: 'orb-float 5s infinite alternate',
-        animationDelay: '-1s',
+        left: "80%",
+        animation: "orb-float 5s infinite alternate",
+        animationDelay: "-1s",
       }}
     />
   </div>
@@ -140,26 +143,21 @@ const SettingsIcon = () => (
   </svg>
 );
 
-
 const ProfileCard = ({ profile }: { profile: Profile | null }) => {
   const [isReadmeModalOpen, setIsReadmeModalOpen] = useState(false);
   // Ambil state sesi, bukan state animasi
-  const { 
-    activeAnimation, 
-    isAuthenticated, 
-    isLoading, 
-    login 
-  } = useAnimationStore();
-  
+  const { activeAnimation, isAuthenticated, isLoading, login } =
+    useAnimationStore();
+
   const { isConnected } = useAccount();
 
   const renderAnimation = () => {
     switch (activeAnimation) {
-      case 'dino':
+      case "dino":
         return <DinoAnimation />;
-      case 'walker':
+      case "walker":
         return <WalkerBirdAnimation />;
-      case 'orbs':
+      case "orbs":
         return <OrbsAnimation />;
       default:
         return (
@@ -203,7 +201,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
       // 2. Sudah konek, tapi belum login (Tampilkan tombol Login (SIWE))
       return (
         <button
-          onClick={login} 
+          onClick={login}
           className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white transition-all hover:bg-white/40"
         >
           Login (Sign)
@@ -216,7 +214,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
       <Link
         href="/settings/profile"
         className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 transition-all hover:bg-white/40"
-          aria-label="Animation Settings"
+        aria-label="Animation Settings"
       >
         <SettingsIcon />
       </Link>
@@ -225,20 +223,20 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
 
   const displayImageUrl = resolveIpfsUrl(profile?.imageUrl) || "/profile.jpeg";
 
-  const githubUrl = profile?.github 
-    ? `https://github.com/${profile.github}` 
-    : '#';
+  const githubUrl = profile?.github
+    ? `https://github.com/${profile.github}`
+    : "#";
 
   const readmeIpfsUrl = profile?.readmeUrl;
   const hasReadme = !!readmeIpfsUrl;
-  const readmeName = profile?.readmeName || 'Readme.md';
+  const readmeName = profile?.readmeName || "Readme.md";
 
   return (
     <>
       {isReadmeModalOpen && (
-        <ReadmeModal 
-          readmeUrl={readmeIpfsUrl} 
-          onClose={() => setIsReadmeModalOpen(false)} 
+        <ReadmeModal
+          readmeUrl={readmeIpfsUrl}
+          onClose={() => setIsReadmeModalOpen(false)}
         />
       )}
 
@@ -266,9 +264,9 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
         }
       `}</style>
 
-      <div className="relative flex flex-col overflow-hidden rounded-sm bg-white shadow-sm md:row-span-1 md:col-span-1">
+      <div className="relative flex flex-col overflow-hidden rounded-md bg-white shadow-sm md:row-span-1 md:col-span-1">
         <div className="relative h-40 w-full md:h-48 overflow-hidden bg-zinc-900">
-          <div className="relative h-full w-full max-w-2xl mx-auto"> 
+          <div className="relative h-full w-full max-w-2xl mx-auto">
             {renderAnimation()}
           </div>
 
@@ -281,7 +279,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
         <div className="flex flex-1 flex-col p-6 pt-0">
           <img
             className="relative -mt-12 mb-4 h-24 w-24 rounded-full object-cover"
-            src={displayImageUrl} 
+            src={displayImageUrl}
             alt="//www.flaticon.com/authors/luch-phou"
             width={96}
             height={96}
@@ -290,38 +288,46 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
           <div className="mb-6 flex flex-col gap-2">
             <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
               {/* Gunakan 'name' dari profil, atau default jika belum login */}
-              {profile ? profile.name : (isAuthenticated ? 'New User' : 'Welcome')}
+              {profile
+                ? profile.name
+                : isAuthenticated
+                ? "New User"
+                : "Welcome"}
             </h1>
             <p className="text-base leading-relaxed text-zinc-600">
               {/* Gunakan 'bio' dari profil, atau default jika belum login */}
-              {profile ? profile.bio : "Please connect and log in to view or update your profile."}
+              {profile
+                ? profile.bio
+                : "Please connect and log in to view or update your profile."}
             </p>
           </div>
-         
+
           <div className="flex-grow" />
 
           <div className="flex flex-row gap-3">
             <a
-              className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 ${!profile?.github ? 'pointer-events-none opacity-50' : ''}`}
-              href={githubUrl} 
+              className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 ${
+                !profile?.github ? "pointer-events-none opacity-50" : ""
+              }`}
+              href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
               <GithubIcon />
-              {profile?.github ? 'My Github' : 'GitHub Not Set'}
+              {profile?.github ? "My Github" : "GitHub Not Set"}
             </a>
             <button
               type="button"
               onClick={() => setIsReadmeModalOpen(true)}
-              disabled={!hasReadme} 
+              disabled={!hasReadme}
               className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-solid border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors ${
-                !hasReadme 
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-zinc-50'
+                !hasReadme
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-zinc-50"
               }`}
             >
               <FileIcon />
-              {hasReadme ? readmeName : 'Readme.md'}
+              {hasReadme ? readmeName : "Readme.md"}
             </button>
           </div>
         </div>

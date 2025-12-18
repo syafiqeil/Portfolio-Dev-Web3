@@ -38,8 +38,8 @@ export default function Home() {
 
   // Jika sudah login dan punya profil (atau jika belum login)
   return (
-    <main className="flex min-h-screen w-full flex-col bg-black p-4 pt-3 md:p-3 md:h-screen md:max-h-screen md:overflow-hidden">
-      <div className="grid w-full h-auto md:h-full grid-cols-1 gap-3 md:grid-cols-2 lg:grid-rows-[45%_55%]">
+    <main className="flex min-h-screen w-full flex-col bg-black p-4 pt-3 md:p-4 md:h-screen md:max-h-screen md:overflow-hidden">
+      <div className="grid w-full h-auto md:h-full grid-cols-1 gap-3 md:grid-cols-2 lg:grid-rows-[45fr_55fr]">
         <ProfileCard profile={profile} />
         <ProjectCard />
         <ActivityCard />
