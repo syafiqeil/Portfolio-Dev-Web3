@@ -173,7 +173,7 @@ const ProjectCard = () => {
       />
 
       <div className="relative flex flex-col h-full rounded-md bg-white shadow-sm md:row-span-1 overflow-hidden">
-        <div className="flex items-center gap-3 p-6 pb-2 flex-shrink-0">
+        <div className="flex items-center gap-3 p-4 pb-2 md:p-6 flex-shrink-0">
           <ProjectIcon />
           <h2 className="text-xl font-semibold text-zinc-900">What I built</h2>
         </div>
@@ -208,7 +208,7 @@ const ProjectCard = () => {
 
 // --- Fallback State (Static) ---
 const StaticProjectCard = () => (
-  <div className="rounded-md bg-white p-6 shadow-sm md:row-span-1 flex flex-col h-full">
+  <div className="rounded-md bg-white p-4 md:p-6 shadow-sm md:row-span-1 flex flex-col h-full">
     <div className="flex items-center gap-3 flex-shrink-0">
       <ProjectIcon />
       <h2 className="text-xl font-semibold text-zinc-900">What I built</h2>

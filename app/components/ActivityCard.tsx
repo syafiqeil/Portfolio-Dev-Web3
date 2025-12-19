@@ -141,7 +141,7 @@ const ActivityCard = () => {
 
   if (!isHydrated || !profile) {
     return (
-      <div className="rounded-md bg-white p-6 shadow-sm md:col-span-2 flex flex-col">
+      <div className="rounded-md bg-white p-4 md:p-6 shadow-sm md:col-span-2 flex flex-col">
         <div className="flex justify-start gap-3 flex-shrink-0">
           <ActivityIcon />
           <h2 className="text-sm font-semibold text-zinc-900">Activity</h2>
@@ -162,7 +162,7 @@ const ActivityCard = () => {
         onClose={() => setSelectedCert(null)}
       />
 
-      <div className="rounded-md bg-white p-6 shadow-sm md:col-span-2 flex flex-col">
+      <div className="rounded-md bg-white p-4 md:p-6 shadow-sm md:col-span-2 flex flex-col">
         <div className="flex items-center gap-3 mb-4 flex-shrink-0">
           <ActivityIcon />
           <h2 className="text-xl font-semibold text-zinc-900">Activity</h2>
