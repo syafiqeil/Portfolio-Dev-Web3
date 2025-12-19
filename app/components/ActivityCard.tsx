@@ -250,51 +250,45 @@ const ActivityCard = () => {
                   <button
                     key={cert.id}
                     onClick={() => setSelectedCert(cert)}
-                    className="group relative aspect-video w-full overflow-hidden rounded-md bg-zinc-900 border border-zinc-200/50 hover:border-purple-500/50 transition-all duration-300 shadow-sm hover:shadow-purple-500/20"
+                    className="group flex flex-col w-full aspect-video rounded-md bg-white"
                   >
-                    {(() => {
-                      const imgSrc = resolveIpfsUrl(cert.imageUrl);
-                      return imgSrc ? (
-                        <>
+                    <div className="relative w-full flex-1 overflow-hidden rounded-sm bg-zinc-100">
+                      {(() => {
+                        const imgSrc = resolveIpfsUrl(cert.imageUrl);
+                        return imgSrc ? (
                           <img
                             src={imgSrc}
                             alt={cert.title}
-                            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                            className="w-full h-full object-cover rounded-md border"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 text-[10px] bg-zinc-900">
-                          <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center mb-1">
-                            <span className="text-white/20">NFT</span>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 text-[10px] bg-zinc-50">
+                            <span className="text-zinc-300">No Asset</span>
                           </div>
-                          No Asset
-                        </div>
-                      );
-                    })()}
-                    <div className="absolute bottom-0 inset-x-0 p-2 transform translate-y-1 group-hover:translate-y-0 transition-transform">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.8)]" />
-                        <p className="text-white text-[10px] font-medium tracking-wide truncate">
-                          {cert.title || "UNTITLED"}
-                        </p>
-                      </div>
+                        );
+                      })()}
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                    <div className="mt-1.5 w-full flex-shrink-0 flex items-center justify-center">
+                      <p className="text-zinc-800 text-[10px] font-medium truncate group-hover:text-sky-600 transition-colors w-full text-center">
+                        {cert.title || "UNTITLED"}
+                      </p>
+                    </div>
                   </button>
                 ))}
 
-                {/* Fill empty slots with placeholders */}
+                {/* Placeholder untuk slot kosong */}
                 {certificates.length < 4 &&
                   Array.from({ length: 4 - certificates.length }).map(
                     (_, i) => (
                       <div
                         key={i}
-                        className="aspect-video rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 flex items-center justify-center"
+                        className="w-full aspect-video rounded-md border border-dashed border-zinc-200 bg-zinc-50/30 flex flex-col items-center justify-center gap-2"
                       >
-                        <span className="text-zinc-300 text-[10px]">
-                          Empty Slot
-                        </span>
+                        <div className="w-full flex-1 rounded-sm bg-zinc-100/50 flex items-center justify-center">
+                          <span className="text-zinc-300 text-[10px]">Empty</span>
+                        </div>
+                        <div className="h-2.5 w-12 bg-zinc-100 rounded-full flex-shrink-0" />
                       </div>
                     )
                   )}
