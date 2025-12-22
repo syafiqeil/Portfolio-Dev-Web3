@@ -245,7 +245,7 @@ const ActivityCard = () => {
             </h3>
 
             {certificates.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 content-start">
+              <div className="grid-cols-2 md:grid gap-3 content-start">
                 {certificates.slice(0, 4).map((cert) => (
                   <button
                     key={cert.id}

@@ -21,7 +21,6 @@ import {
 } from 'wagmi'; 
 import { SiweMessage } from 'siwe';
 import { resolveIpfsUrl } from './utils';
-import { Project } from 'next/dist/build/swc/types';
 
 // --- ALAMAT & ABI KONTRAK ---
 const USER_PROFILE_CONTRACT_ADDRESS = '0x8c09c8db25b81e5a9e1462f9bdc83dfcc7d7bf99';
@@ -69,7 +68,12 @@ const userProfileAbi = [
 ];
 
 // --- Tipe Data ---
-export interface ActivityItem { id: string; title: string; url: string; }
+export interface ActivityItem { 
+  id: string; 
+  title: string; 
+  url: string; 
+}
+
 export interface SocialLink {
   id: string;
   platform: string; 
@@ -93,7 +97,6 @@ export interface Certificate {
   credentialUrl?: string; 
 }
 
-// 2. Perbarui Interface Profile
 export interface Profile {
   name: string;
   bio: string;
@@ -112,14 +115,36 @@ export interface Profile {
   pendingImageFile?: File | null;
   pendingReadmeFile?: File | null;
 }
+
 export interface AnimationExtension { id: string; name: string; }
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  projectUrl?: string;
+  tags: string[];
+  isFeatured: boolean;
+  gallery: string[];         // Array URL foto (Maks 7)
+  videoUrl?: string | null;  // URL Video
+  videoThumbnail?: string | null; // Cover Video
+
+  // File Mentah untuk Upload (Local Draft)
+  pendingGalleryFiles?: File[];
+  pendingVideoFile?: File | null;
+  pendingVideoThumbnailFile?: File | null;
+
+  // Field Lama (untuk backward compatibility sementara)
+  mediaPreview?: string | null;
+  mediaIpfsUrl?: string | null;
+}
 
 // --- Tipe Konteks ---
 interface SessionContextType {
   isAuthenticated: boolean;
   isLoading: boolean; // Loading sesi
   isProfileLoading: boolean; // Loading data profil
-  profile: Profile | null; // Ini akan menjadi DRAF
+  profile: Profile | null; 
   
   login: () => Promise<void>;
   logout: () => void;

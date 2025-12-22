@@ -100,7 +100,19 @@ const LightProjectItem = ({
   project: Project;
   onClick: () => void;
 }) => {
-  const mediaUrl = project.mediaPreview || resolveIpfsUrl(project.mediaIpfsUrl);
+  
+  let displayImage = "/placeholder.png"; // Default
+  
+  if (project.videoThumbnail) {
+    displayImage = resolveIpfsUrl(project.videoThumbnail);
+  } else if (project.gallery && project.gallery.length > 0) {
+    displayImage = resolveIpfsUrl(project.gallery[0]);
+  } else if (project.mediaPreview || project.mediaIpfsUrl) {
+    displayImage = project.mediaPreview || resolveIpfsUrl(project.mediaIpfsUrl);
+  }
+
+  // Cek apakah item ini memiliki video (untuk UI indicator opsional)
+  const hasVideo = !!project.videoUrl;
 
   return (
     <button
@@ -109,11 +121,22 @@ const LightProjectItem = ({
     >
       {/* Media Area */}
       <div className="relative h-40 p-2 overflow-hidden">
-        <MediaRenderer
-          src={mediaUrl}
-          alt={project.name}
-          className="w-full h-full flex-shrink-0 bg-zinc-100 overflow-hidden transition-colors border border-zinc-200 group-hover:border-zinc-700 rounded-md"
-        />
+        <div className="w-full h-full flex-shrink-0 bg-zinc-100 overflow-hidden transition-colors border border-zinc-200 group-hover:border-zinc-700 rounded-md relative">
+           <img
+            src={displayImage}
+            alt={project.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+          {/* Indikator Play jika ada video */}
+          {hasVideo && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content Area */}
