@@ -141,12 +141,13 @@ const LightProjectItem = ({
 
       {/* Content Area */}
       <div className="flex flex-col flex-1 p-4">
-        <div className="flex justify-between items-start gap-2">
+        <div className="flex justify-between items-center gap-2"> {/* Ubah items-start ke items-center */}
           <h3 className="font-semibold text-zinc-900 text-base line-clamp-1 group-hover:text-sky-600 transition-colors">
             {project.name}
           </h3>
           {project.projectUrl && (
-            <span className="text-zinc-400 mt-0.5">
+            // Hapus mt-0.5, tambahkan flex agar span berperilaku sebagai container yang rapi
+            <span className="text-zinc-400 flex items-center justify-center">
               <ExternalLinkIcon />
             </span>
           )}
