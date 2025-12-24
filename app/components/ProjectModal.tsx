@@ -57,7 +57,7 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-5xl bg-white rounded-lg shadow-2xl flex flex-col max-h-[95vh]"
+        className="relative w-full max-w-5xl bg-white rounded-md shadow-2xl flex flex-col max-h-[95vh]"
         style={{ animation: "fadeIn 0.2s ease-out" }}
       >
         <button
@@ -140,26 +140,39 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
                 Gallery
               </h3>
               <div className="grid grid-cols-3 md:grid-cols-2 gap-2">
-                
                 {/* 1. Item Khusus: VIDEO (Jika ada) */}
                 {videoUrl && (
                   <button
-                    onClick={() => setActiveMedia({ type: "video", url: videoUrl })}
+                    onClick={() =>
+                      setActiveMedia({ type: "video", url: videoUrl })
+                    }
                     className={`relative aspect-square rounded-md overflow-hidden bg-black group border-2 ${
-                      activeMedia?.url === videoUrl ? "border-sky-500" : "border-transparent"
+                      activeMedia?.url === videoUrl
+                        ? "border-sky-500"
+                        : "border-transparent"
                     }`}
                   >
                     {/* Thumbnail Video atau Placeholder Hitam */}
                     {videoThumb ? (
-                       <img src={videoThumb} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                      <img
+                        src={videoThumb}
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      />
                     ) : (
-                       <div className="w-full h-full bg-zinc-800" />
+                      <div className="w-full h-full bg-zinc-800" />
                     )}
-                    
+
                     {/* Icon Play Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="white"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
                       </div>
                     </div>
                   </button>
@@ -171,7 +184,9 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
                     key={idx}
                     onClick={() => setActiveMedia({ type: "image", url: src })}
                     className={`relative aspect-square rounded-md overflow-hidden bg-zinc-100 group border-2 ${
-                       activeMedia?.url === src ? "border-sky-500" : "border-transparent"
+                      activeMedia?.url === src
+                        ? "border-sky-500"
+                        : "border-transparent"
                     }`}
                   >
                     <img
@@ -185,10 +200,14 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
                 {/* 3. Legacy Media (Fallback jika tidak ada galeri baru) */}
                 {gallery.length === 0 && legacyMedia && !videoUrl && (
                   <button
-                     onClick={() => setActiveMedia({ type: "image", url: legacyMedia })}
-                     className={`aspect-square rounded-md overflow-hidden bg-zinc-100 border-2 ${
-                        activeMedia?.url === legacyMedia ? "border-sky-500" : "border-transparent"
-                     }`}
+                    onClick={() =>
+                      setActiveMedia({ type: "image", url: legacyMedia })
+                    }
+                    className={`aspect-square rounded-md overflow-hidden bg-zinc-100 border-2 ${
+                      activeMedia?.url === legacyMedia
+                        ? "border-sky-500"
+                        : "border-transparent"
+                    }`}
                   >
                     <img
                       src={legacyMedia}

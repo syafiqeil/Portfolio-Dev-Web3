@@ -2,7 +2,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
-import { useAnimationStore, BlogPost, Certificate, SocialLink} from "@/app/lib/SessionProvider";
+import {
+  useAnimationStore,
+  BlogPost,
+  Certificate,
+  SocialLink,
+} from "@/app/lib/SessionProvider";
 import { useDebounce, resolveIpfsUrl } from "@/app/lib/utils";
 import BudgetCard from "@/app/components/BudgetCard";
 
@@ -49,7 +54,16 @@ const ImageIcon = () => (
 );
 
 const MessageIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
@@ -62,7 +76,7 @@ export default function ActivitySettingsPage() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [email, setEmail] = useState(""); 
+  const [email, setEmail] = useState("");
   const [connectMsg, setConnectMsg] = useState("");
 
   // Refs untuk input file (hidden)
@@ -96,7 +110,7 @@ export default function ActivitySettingsPage() {
 
   useEffect(() => {
     if (!hasLoaded) return;
-    saveDraft({ 
+    saveDraft({
       activity: debouncedActivity,
     });
   }, [debouncedActivity, saveDraft, hasLoaded]);
@@ -166,32 +180,36 @@ export default function ActivitySettingsPage() {
       { id: `social_${Date.now()}`, platform: "website", url: "" },
     ]);
   };
-  const updateSocialLink = (id: string, field: keyof SocialLink, value: string) => {
+  const updateSocialLink = (
+    id: string,
+    field: keyof SocialLink,
+    value: string
+  ) => {
     setSocialLinks((links) =>
       links.map((l) => {
         if (l.id !== id) return l;
 
         // Jika yang diubah adalah URL, kita lakukan deteksi platform otomatis
-        if (field === 'url') {
-           let platform = l.platform;
-           const urlLower = value.toLowerCase();
-           
-           if (urlLower.includes("twitter.com") || urlLower.includes("x.com"))
-             platform = "twitter";
-           else if (urlLower.includes("t.me") || urlLower.includes("telegram"))
-             platform = "telegram";
-           else if (urlLower.includes("medium.com")) platform = "medium";
-           else if (urlLower.includes("linkedin.com")) platform = "linkedin";
-           else if (urlLower.includes("discord")) platform = "discord";
-           else if (urlLower.includes("instagram")) platform = "instagram";
-           else if (urlLower.includes("github")) platform = "github";
+        if (field === "url") {
+          let platform = l.platform;
+          const urlLower = value.toLowerCase();
 
-           return { ...l, url: value, platform };
+          if (urlLower.includes("twitter.com") || urlLower.includes("x.com"))
+            platform = "twitter";
+          else if (urlLower.includes("t.me") || urlLower.includes("telegram"))
+            platform = "telegram";
+          else if (urlLower.includes("medium.com")) platform = "medium";
+          else if (urlLower.includes("linkedin.com")) platform = "linkedin";
+          else if (urlLower.includes("discord")) platform = "discord";
+          else if (urlLower.includes("instagram")) platform = "instagram";
+          else if (urlLower.includes("github")) platform = "github";
+
+          return { ...l, url: value, platform };
         }
 
         // Jika yang diubah adalah Platform (Dropdown), update platform saja
-        if (field === 'platform') {
-           return { ...l, platform: value };
+        if (field === "platform") {
+          return { ...l, platform: value };
         }
 
         return l;
@@ -277,12 +295,12 @@ export default function ActivitySettingsPage() {
           {blogPosts.map((post) => (
             <div
               key={post.id}
-              className="p-4 border rounded-md bg-white flex gap-4 items-start"
+              className="p-4 border border-zinc-200 rounded-md bg-white flex gap-4 items-start shadow-sm"
             >
               {/* Image Preview */}
               <div
                 onClick={() => triggerUpload(post.id, "blog")}
-                className="w-24 h-24 bg-zinc-100 rounded-lg flex-shrink-0 cursor-pointer overflow-hidden border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 transition"
+                className="w-24 h-24 bg-zinc-100 rounded-md flex-shrink-0 cursor-pointer overflow-hidden border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 transition"
               >
                 {(() => {
                   const imgSrc = resolveIpfsUrl(post.coverImage);
@@ -354,7 +372,7 @@ export default function ActivitySettingsPage() {
           {certificates.map((cert) => (
             <div
               key={cert.id}
-              className="p-3 border rounded-lg bg-white flex flex-col gap-3"
+              className="p-3 border border-zinc-200 rounded-md bg-white flex flex-col gap-3 shadow-sm"
             >
               <div
                 onClick={() => triggerUpload(cert.id, "cert")}
@@ -411,95 +429,107 @@ export default function ActivitySettingsPage() {
       {/* 3. Social Links Section */}
       <section className="flex flex-col gap-6">
         <div>
-          <h2 className="text-lg font-medium text-zinc-800">Connect & Socials</h2>
-          <p className="text-sm text-zinc-500">Manage how people can reach you.</p>
+          <h2 className="text-lg font-medium text-zinc-800">
+            Connect & Socials
+          </h2>
+          <p className="text-sm text-zinc-500">
+            Manage how people can reach you.
+          </p>
         </div>
 
-        <div className="p-5 rounded-xl border border-zinc-200 bg-white shadow-sm flex flex-col gap-6">
-          
+        <div className="p-5 rounded-md border border-zinc-200 bg-white shadow-sm flex flex-col gap-6">
           {/* Input Teks Ajakan */}
           <div className="flex flex-col gap-3">
-             <label className="text-sm font-semibold text-zinc-700 flex items-center gap-2">
-               <MessageIcon /> Invitation Message
-             </label>
-             <div className="relative group">
-                <textarea
-                  value={connectMsg}
-                  onChange={(e) => setConnectMsg(e.target.value)}
-                  placeholder="e.g. 'I'm currently open for new opportunities. Let's build something amazing together!'"
-                  rows={3}
-                  maxLength={200}
-                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all resize-none"
-                />
-                {/* Character Counter */}
-                <div className="absolute bottom-3 right-3 text-[10px] text-zinc-400 bg-zinc-50/80 px-1 rounded">
-                  {connectMsg.length}/200
-                </div>
-             </div>
-             <p className="text-xs text-zinc-500">
-               This text will be displayed prominently above your contact links. Make it welcoming!
-             </p>
+            <label className="text-sm font-semibold text-zinc-700 flex items-center gap-2">
+              <MessageIcon /> Invitation Message
+            </label>
+            <div className="relative group">
+              <textarea
+                value={connectMsg}
+                onChange={(e) => setConnectMsg(e.target.value)}
+                placeholder="e.g. 'I'm currently open for new opportunities. Let's build something amazing together!'"
+                rows={3}
+                maxLength={200}
+                className="w-full rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all resize-none"
+              />
+              {/* Character Counter */}
+              <div className="absolute bottom-3 right-3 text-[10px] text-zinc-400 bg-zinc-50/80 px-1 rounded">
+                {connectMsg.length}/200
+              </div>
+            </div>
+            <p className="text-xs text-zinc-500">
+              This text will be displayed prominently above your contact links.
+              Make it welcoming!
+            </p>
           </div>
 
           <hr className="border-dashed border-zinc-200" />
 
           {/* Email */}
           <div>
-            <label className="text-sm font-medium text-zinc-700 mb-1.5 block">Contact Email</label>
+            <label className="text-sm font-medium text-zinc-700 mb-1.5 block">
+              Contact Email
+            </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none transition-colors"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none transition-colors"
             />
           </div>
 
           {/* Social Links */}
           <div>
-             <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium text-zinc-700">Social Links</label>
-             </div>
-             
-             <div className="flex flex-col gap-3">
-               {socialLinks.map((link) => (
-                 <div key={link.id} className="flex gap-2">
-                   <select
-                     value={link.platform}
-                     onChange={(e) => updateSocialLink(link.id, 'platform', e.target.value)}
-                     className="w-32 rounded-lg border border-zinc-300 px-3 py-2 text-sm bg-white"
-                   >
-                     <option value="twitter">Twitter / X</option>
-                     <option value="github">GitHub</option>
-                     <option value="linkedin">LinkedIn</option>
-                     <option value="instagram">Instagram</option>
-                     <option value="telegram">Telegram</option>
-                     <option value="medium">Medium</option>
-                     <option value="website">Website</option>
-                   </select>
-                   <input
-                     type="text"
-                     value={link.url}
-                     onChange={(e) => updateSocialLink(link.id, 'url', e.target.value)}
-                     placeholder="https://..."
-                     className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
-                   />
-                   <button
-                     onClick={() => removeSocialLink(link.id)}
-                     className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
-                   >
-                     <TrashIcon />
-                   </button>
-                 </div>
-               ))}
-               
-               <button
-                 onClick={addSocialLink}
-                 className="flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-dashed border-zinc-300 text-sm text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all mt-1"
-               >
-                 <PlusIcon /> Add Social Link
-               </button>
-             </div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium text-zinc-700">
+                Social Links
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {socialLinks.map((link) => (
+                <div key={link.id} className="flex gap-2">
+                  <select
+                    value={link.platform}
+                    onChange={(e) =>
+                      updateSocialLink(link.id, "platform", e.target.value)
+                    }
+                    className="w-32 rounded-md border border-zinc-300 px-3 py-2 text-sm bg-white"
+                  >
+                    <option value="twitter">Twitter / X</option>
+                    <option value="github">GitHub</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="telegram">Telegram</option>
+                    <option value="medium">Medium</option>
+                    <option value="website">Website</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={link.url}
+                    onChange={(e) =>
+                      updateSocialLink(link.id, "url", e.target.value)
+                    }
+                    placeholder="https://..."
+                    className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  />
+                  <button
+                    onClick={() => removeSocialLink(link.id)}
+                    className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                onClick={addSocialLink}
+                className="flex items-center justify-center gap-2 w-full py-2 rounded-md border border-dashed border-zinc-300 text-sm text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all mt-1"
+              >
+                <PlusIcon /> Add Social Link
+              </button>
+            </div>
           </div>
         </div>
       </section>

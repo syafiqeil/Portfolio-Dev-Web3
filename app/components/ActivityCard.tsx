@@ -169,7 +169,6 @@ const ActivityCard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.1fr_0.8fr] gap-6 h-auto md:h-full min-h-0 md:overflow-hidden">
-  
           {/* --- 1. BLOGS --- */}
           <div className="flex flex-col gap-3 pr-1">
             <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider sticky top-0 bg-white z-10">
@@ -192,7 +191,7 @@ const ActivityCard = () => {
                     <Link
                       key={post.id}
                       href={`/blog/${post.id}`}
-                      className="group flex gap-4 p-4 border rounded-lg hover:bg-zinc-100 transition-all items-start"
+                      className="group flex gap-4 p-4 border rounded-md hover:bg-zinc-100 transition-all items-start shadow-sm"
                     >
                       <div className="w-20 h-20 flex-shrink-0 bg-zinc-100 overflow-hidden transition-colors border border-zinc-200 group-hover:border-zinc-700 rounded-md">
                         {(() => {
@@ -232,7 +231,7 @@ const ActivityCard = () => {
                 })}
               </div>
             ) : (
-              <div className="h-24 border border-dashed border-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs">
+              <div className="h-24 border border-dashed border-zinc-200 rounded-md flex items-center justify-center text-zinc-400 text-xs">
                 No blogs posted yet.
               </div>
             )}
@@ -252,14 +251,14 @@ const ActivityCard = () => {
                     onClick={() => setSelectedCert(cert)}
                     className="group flex flex-col w-full aspect-video rounded-md bg-white"
                   >
-                    <div className="relative w-full flex-1 overflow-hidden rounded-sm bg-zinc-100">
+                    <div className="relative w-full flex-1 overflow-hidden rounded-md bg-white shadow-sm">
                       {(() => {
                         const imgSrc = resolveIpfsUrl(cert.imageUrl);
                         return imgSrc ? (
                           <img
                             src={imgSrc}
                             alt={cert.title}
-                            className="w-full h-full object-cover rounded-md border"
+                            className="w-full h-full object-cover rounded-md border shadow-sm"
                           />
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 text-[10px] bg-zinc-50">
@@ -285,8 +284,10 @@ const ActivityCard = () => {
                         key={i}
                         className="w-full aspect-video rounded-md border border-dashed border-zinc-200 bg-zinc-50/30 flex flex-col items-center justify-center gap-2"
                       >
-                        <div className="w-full flex-1 rounded-sm bg-zinc-100/50 flex items-center justify-center">
-                          <span className="text-zinc-300 text-[10px]">Empty</span>
+                        <div className="w-full flex-1 rounded-md bg-zinc-100/50 flex items-center justify-center">
+                          <span className="text-zinc-300 text-[10px]">
+                            Empty
+                          </span>
                         </div>
                         <div className="h-2.5 w-12 bg-zinc-100 rounded-full flex-shrink-0" />
                       </div>
@@ -294,7 +295,7 @@ const ActivityCard = () => {
                   )}
               </div>
             ) : (
-              <div className="h-full border border-dashed border-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs">
+              <div className="h-full border border-dashed border-zinc-200 rounded-md flex items-center justify-center text-zinc-400 text-xs">
                 No certificates.
               </div>
             )}
@@ -307,7 +308,7 @@ const ActivityCard = () => {
             </h3>
 
             {activity?.connectMsg && (
-              <div className="p-3 bg-gradient-to-br from-zinc-50 to-white rounded-lg border">
+              <div className="p-3 bg-gradient-to-br from-zinc-50 to-white rounded-md border">
                 <p className="text-sm text-zinc-700 mb-6 italic font-medium leading-relaxed">
                   "{activity.connectMsg}"
                 </p>

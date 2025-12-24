@@ -20,7 +20,7 @@ const NavLink = ({
   return (
     <Link
       href={href}
-      className={`block rounded-lg px-3 py-2 text-sm font-medium ${
+      className={`block rounded-md px-3 py-2 text-sm font-medium ${
         isActive
           ? "bg-zinc-100 text-zinc-900"
           : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
@@ -92,7 +92,7 @@ export default function SettingsLayout({
             <button
               onClick={handlePublish}
               disabled={isPublishing || !hasUnpublishedChanges} // <-- Nonaktif jika SINKRON
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50 disabled:bg-green-400"
+              className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50 disabled:bg-green-400"
             >
               {isPublishing ? "Publishing..." : "Publish to On-Chain"}
             </button>

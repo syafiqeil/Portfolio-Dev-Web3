@@ -2,44 +2,88 @@
 
 "use client";
 
-import { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { useAnimationStore } from '@/app/lib/useAnimationStore'; 
-import { useRouter } from 'next/navigation';
-import { resolveIpfsUrl, useDebounce } from '@/app/lib/utils';
+import { useState, useEffect, useRef, ChangeEvent } from "react";
+import { useAnimationStore } from "@/app/lib/useAnimationStore";
+import { useRouter } from "next/navigation";
+import { resolveIpfsUrl, useDebounce } from "@/app/lib/utils";
 
 const ImageIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </svg>
 );
 const FileTextIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <line x1="10" y1="9" x2="8" y2="9" />
+  </svg>
 );
 const TrashIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    <line x1="10" y1="11" x2="10" y2="17" />
+    <line x1="14" y1="11" x2="14" y2="17" />
+  </svg>
 );
 
 export default function ProfileSettingsPage() {
   const {
     profile,
-    saveDraft, 
+    saveDraft,
     activeAnimation,
     setActiveAnimation,
     extensions,
     addExtension,
     isHydrated,
-    logout
+    logout,
   } = useAnimationStore();
 
   const router = useRouter();
 
   // --- State LOKAL untuk form ---
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [github, setGithub] = useState('');
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [github, setGithub] = useState("");
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [readmeFile, setReadmeFile] = useState<File | null>(null);
-  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(
+    null
+  );
   const [readmeFileName, setReadmeFileName] = useState<string | null>(null);
-  const [repoUrl, setRepoUrl] = useState('');
+  const [repoUrl, setRepoUrl] = useState("");
   const [hasLoaded, setHasLoaded] = useState(false);
 
   // Refs
@@ -51,15 +95,17 @@ export default function ProfileSettingsPage() {
 
   // --- 1. Muat data dari Global ke Lokal saat komponen dimuat ---
   useEffect(() => {
-    if (isHydrated && profile && !hasLoaded) { 
-      setName(profile.name || '');
-      setBio(profile.bio || '');
-      setGithub(profile.github || '');
+    if (isHydrated && profile && !hasLoaded) {
+      setName(profile.name || "");
+      setBio(profile.bio || "");
+      setGithub(profile.github || "");
       // @ts-ignore
-      setProfileImagePreview(resolveIpfsUrl(profile.imageUrl) || "/profilgue.png");
+      setProfileImagePreview(
+        resolveIpfsUrl(profile.imageUrl) || "/profilgue.png"
+      );
       // @ts-ignore
       setReadmeFileName(profile.readmeName || null);
-      
+
       setHasLoaded(true);
     }
   }, [isHydrated, profile, hasLoaded]);
@@ -68,46 +114,52 @@ export default function ProfileSettingsPage() {
   useEffect(() => {
     if (isHydrated && profile) {
       const currentGlobalImg = resolveIpfsUrl(profile.imageUrl);
-      
+
       // Jika sistem mendeteksi URL baru (bukan data:...), reset form lokal agar sinkron
-      if (profile.imageUrl && !profile.imageUrl.startsWith('data:')) {
-         setProfileImagePreview(currentGlobalImg || "/profilgue.png");
-         setProfileImageFile(null); 
-         setName(profile.name || '');
-         setBio(profile.bio || '');
-         setGithub(profile.github || '');
-         
-         // PENTING: Reset dirty state karena ini adalah sinkronisasi sistem, bukan input user
-         isDirty.current = false;
+      if (profile.imageUrl && !profile.imageUrl.startsWith("data:")) {
+        setProfileImagePreview(currentGlobalImg || "/profilgue.png");
+        setProfileImageFile(null);
+        setName(profile.name || "");
+        setBio(profile.bio || "");
+        setGithub(profile.github || "");
+
+        // PENTING: Reset dirty state karena ini adalah sinkronisasi sistem, bukan input user
+        isDirty.current = false;
       }
     }
   }, [profile, isHydrated]);
 
   // --- 2. Buat Draf Debounced ---
-  const debouncedDraft = useDebounce({
-    name,
-    bio,
-    github,
-    imageUrl: profileImageFile ? profileImagePreview : (profile?.imageUrl || null),
-    readmeUrl: readmeFile ? URL.createObjectURL(readmeFile) : (profile?.readmeUrl || null),
-    readmeName: readmeFileName,
-  }, 1000); 
+  const debouncedDraft = useDebounce(
+    {
+      name,
+      bio,
+      github,
+      imageUrl: profileImageFile
+        ? profileImagePreview
+        : profile?.imageUrl || null,
+      readmeUrl: readmeFile
+        ? URL.createObjectURL(readmeFile)
+        : profile?.readmeUrl || null,
+      readmeName: readmeFileName,
+    },
+    1000
+  );
 
   // --- 3. Auto-Save ke Global State ---
   useEffect(() => {
     // --- Pengecekan Kritis ---
     // Jangan simpan jika belum loaded ATAU user belum menyentuh form (isDirty false)
     if (!hasLoaded || !isDirty.current) {
-      return; 
+      return;
     }
-    
+
     saveDraft(debouncedDraft);
-    
   }, [debouncedDraft, saveDraft, hasLoaded]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       isDirty.current = true; // [MARK DIRTY]
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -120,18 +172,18 @@ export default function ProfileSettingsPage() {
 
   const handleReadmeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && (file.name.endsWith('.md') || file.type === 'text/markdown')) {
+    if (file && (file.name.endsWith(".md") || file.type === "text/markdown")) {
       isDirty.current = true; // [MARK DIRTY]
       const reader = new FileReader();
       reader.onloadend = () => {
-        setReadmeFile(file); 
+        setReadmeFile(file);
         setReadmeFileName(file.name);
-        saveDraft({ 
-          readmeUrl: reader.result as string, 
-          readmeName: file.name 
+        saveDraft({
+          readmeUrl: reader.result as string,
+          readmeName: file.name,
         });
       };
-      reader.readAsDataURL(file); 
+      reader.readAsDataURL(file);
     }
   };
 
@@ -140,7 +192,7 @@ export default function ProfileSettingsPage() {
     setReadmeFile(null);
     setReadmeFileName(null);
     saveDraft({ readmeUrl: null, readmeName: null });
-    if(readmeInputRef.current) readmeInputRef.current.value = ""; 
+    if (readmeInputRef.current) readmeInputRef.current.value = "";
   };
 
   const handleImport = () => {
@@ -148,27 +200,30 @@ export default function ProfileSettingsPage() {
       // Import extension tidak mengubah field profil, jadi mungkin tidak perlu isDirty
       // Tapi jika activeAnimation berubah, itu ditangani terpisah
       addExtension(repoUrl.trim());
-      setRepoUrl(''); 
+      setRepoUrl("");
     }
   };
 
-  const handleDisconnect = () => { 
+  const handleDisconnect = () => {
     logout();
-    router.push('/');
+    router.push("/");
   };
 
   if (!isHydrated || !hasLoaded) {
     return <div className="text-zinc-500">Loading profile settings...</div>;
   }
 
-  const displayImage = profileImageFile ? profileImagePreview : resolveIpfsUrl(profile?.imageUrl) || "/profilgue.png";
+  const displayImage = profileImageFile
+    ? profileImagePreview
+    : resolveIpfsUrl(profile?.imageUrl) || "/profilgue.png";
 
   return (
     <div className="flex flex-col gap-8">
-      
       {/* Bagian 1: Edit Profil */}
       <section>
-        <h2 className="text-lg font-medium text-zinc-800 mb-4">Public Profile</h2>
+        <h2 className="text-lg font-medium text-zinc-800 mb-4">
+          Public Profile
+        </h2>
         <div className="flex items-center gap-4 mb-6">
           <img
             src={displayImage ?? undefined}
@@ -180,7 +235,7 @@ export default function ProfileSettingsPage() {
           <div>
             <button
               onClick={() => imageInputRef.current?.click()}
-              className="flex items-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+              className="flex items-center gap-2 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
             >
               <ImageIcon /> Change Photo
             </button>
@@ -191,7 +246,9 @@ export default function ProfileSettingsPage() {
               accept="image/*"
               className="hidden"
             />
-            <p className="text-xs text-zinc-500 mt-2">PNG, JPG, or GIF. 800x800px recommended.</p>
+            <p className="text-xs text-zinc-500 mt-2">
+              PNG, JPG, or GIF. 800x800px recommended.
+            </p>
           </div>
         </div>
 
@@ -201,41 +258,58 @@ export default function ProfileSettingsPage() {
             <input
               type="text"
               value={name}
-              onChange={(e) => { setName(e.target.value); isDirty.current = true; }}
+              onChange={(e) => {
+                setName(e.target.value);
+                isDirty.current = true;
+              }}
               placeholder="Your full name"
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-700">Bio</label>
             <textarea
               value={bio}
-              onChange={(e) => { setBio(e.target.value); isDirty.current = true; }}
+              onChange={(e) => {
+                setBio(e.target.value);
+                isDirty.current = true;
+              }}
               placeholder="Tell us about yourself..."
               rows={4}
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-zinc-700">GitHub Username</label>
+            <label className="text-sm font-medium text-zinc-700">
+              GitHub Username
+            </label>
             <input
               type="text"
               value={github}
-              onChange={(e) => { setGithub(e.target.value); isDirty.current = true; }}
+              onChange={(e) => {
+                setGithub(e.target.value);
+                isDirty.current = true;
+              }}
               placeholder="e.g. syafiqeil"
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-zinc-700">README.md</label>
-            <div className="mt-1 flex items-center gap-3 w-full rounded-lg border border-zinc-300 px-3 py-2">
+            <label className="text-sm font-medium text-zinc-700">
+              README.md
+            </label>
+            <div className="mt-1 flex items-center gap-3 w-full rounded-md border border-zinc-300 px-3 py-2">
               <span className="flex-1 text-sm text-zinc-700 truncate">
-                {readmeFileName ? readmeFileName : <span className="text-zinc-400">No README.md file yet</span>}
+                {readmeFileName ? (
+                  readmeFileName
+                ) : (
+                  <span className="text-zinc-400">No README.md file yet</span>
+                )}
               </span>
               {readmeFileName && (
-                <button 
-                  onClick={handleRemoveReadme} 
+                <button
+                  onClick={handleRemoveReadme}
                   className="text-zinc-500 hover:text-red-600 flex-shrink-0"
                   title="Delete file"
                 >
@@ -264,35 +338,39 @@ export default function ProfileSettingsPage() {
 
       {/* Bagian 2: Animasi Bawaan */}
       <section>
-        <h2 className="text-lg font-medium text-zinc-800 mb-3">Built-in Animations</h2>
-        <p className="text-sm text-zinc-500 mb-4">Choose one of the built-in animations to display on your banner.</p>
+        <h2 className="text-lg font-medium text-zinc-800 mb-3">
+          Built-in Animations
+        </h2>
+        <p className="text-sm text-zinc-500 mb-4">
+          Choose one of the built-in animations to display on your banner.
+        </p>
         <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-3 p-3 border rounded-lg has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer">
+          <label className="flex items-center gap-3 p-3 border rounded-md has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer">
             <input
               type="radio"
               name="animation"
               value="dino"
-              checked={activeAnimation === 'dino'}
+              checked={activeAnimation === "dino"}
               onChange={(e) => setActiveAnimation(e.target.value)}
             />
             Dino (Error 404)
           </label>
-          <label className="flex items-center gap-3 p-3 border rounded-lg has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer">
+          <label className="flex items-center gap-3 p-3 border rounded-md has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer">
             <input
               type="radio"
               name="animation"
               value="walker"
-              checked={activeAnimation === 'walker'}
+              checked={activeAnimation === "walker"}
               onChange={(e) => setActiveAnimation(e.target.value)}
             />
             Walker & Bird
           </label>
-          <label className="flex items-center gap-3 p-3 border rounded-lg has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer">
+          <label className="flex items-center gap-3 p-3 border rounded-md has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer">
             <input
               type="radio"
               name="animation"
               value="orbs"
-              checked={activeAnimation === 'orbs'}
+              checked={activeAnimation === "orbs"}
               onChange={(e) => setActiveAnimation(e.target.value)}
             />
             Floating Orbs
@@ -314,11 +392,11 @@ export default function ProfileSettingsPage() {
             value={repoUrl}
             onChange={(e) => setRepoUrl(e.target.value)}
             placeholder="username/repo-name"
-            className="flex-grow rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="flex-grow rounded-md border border-zinc-300 px-3 py-2 text-sm"
           />
           <button
             onClick={handleImport}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
           >
             Import
           </button>
@@ -339,7 +417,7 @@ export default function ProfileSettingsPage() {
             {extensions.map((ext) => (
               <label
                 key={ext.id}
-                className="flex items-center justify-between gap-3 p-3 border rounded-lg has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer"
+                className="flex items-center justify-between gap-3 p-3 border rounded-md has-[:checked]:bg-zinc-50 has-[:checked]:border-zinc-300 cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <input
@@ -351,10 +429,10 @@ export default function ProfileSettingsPage() {
                   />
                   {ext.name}
                 </div>
-                <button 
+                <button
                   onClick={(e) => {
-                    e.preventDefault(); 
-                    alert('Extension removal logic will be added here');
+                    e.preventDefault();
+                    alert("Extension removal logic will be added here");
                   }}
                   className="text-zinc-500 hover:text-red-600"
                   title="Delete extension"
@@ -373,7 +451,7 @@ export default function ProfileSettingsPage() {
       <section>
         <button
           onClick={handleDisconnect}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+          className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
         >
           Disconnect Wallet
         </button>

@@ -306,7 +306,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
 
           <div className="flex flex-row gap-3">
             <a
-              className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 ${
+              className={`flex h-10 w-full items-center justify-center gap-2 rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 ${
                 !profile?.github ? "pointer-events-none opacity-50" : ""
               }`}
               href={githubUrl}
@@ -320,7 +320,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
               type="button"
               onClick={() => setIsReadmeModalOpen(true)}
               disabled={!hasReadme}
-              className={`flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-solid border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors ${
+              className={`flex h-10 w-full items-center justify-center gap-2 rounded-md border border-solid border-zinc-200 px-4 text-sm font-medium text-zinc-700 transition-colors ${
                 !hasReadme
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-zinc-50"
