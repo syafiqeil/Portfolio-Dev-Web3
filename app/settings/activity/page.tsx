@@ -2,12 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
-import {
-  useAnimationStore,
-  BlogPost,
-  Certificate,
-  SocialLink,
-} from "@/app/lib/SessionProvider";
+import { useAnimationStore, BlogPost, Certificate, SocialLink} from "@/app/lib/SessionProvider";
 import { useDebounce, resolveIpfsUrl } from "@/app/lib/utils";
 
 // Ikon Helper
@@ -74,6 +69,7 @@ export default function ActivitySettingsPage() {
       setCertificates(profile.activity?.certificates || []);
       setSocialLinks(profile.activity?.socialLinks || []);
       setEmail(profile.activity?.contactEmail || "");
+      setConnectMsg(profile.activity?.connectMsg || "");
       setHasLoaded(true);
     }
   }, [isHydrated, profile, hasLoaded]);
@@ -84,6 +80,7 @@ export default function ActivitySettingsPage() {
       blogPosts,
       certificates,
       socialLinks,
+      connectMsg,
       contactEmail: email,
     },
     1000
@@ -91,7 +88,9 @@ export default function ActivitySettingsPage() {
 
   useEffect(() => {
     if (!hasLoaded) return;
-    saveDraft({ activity: debouncedActivity });
+    saveDraft({ 
+      activity: debouncedActivity,
+    });
   }, [debouncedActivity, saveDraft, hasLoaded]);
 
   // --- Handlers Blog ---
@@ -377,54 +376,98 @@ export default function ActivitySettingsPage() {
       </section>
 
       {/* 3. Social Links Section */}
-      <section>
-        <h2 className="text-lg font-medium text-zinc-800 mb-4">
-          Connect & Socials
-        </h2>
-
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1 block">
-            Primary Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="contact@you.com"
-            className="w-full p-2 border rounded-md text-sm"
-          />
+      <section className="flex flex-col gap-6">
+        <div>
+          <h2 className="text-lg font-medium text-zinc-800">Connect & Socials</h2>
+          <p className="text-sm text-zinc-500">Manage how people can reach you.</p>
         </div>
 
-        <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">
-          Social Links
-        </label>
-        <div className="flex flex-col gap-2">
-          {socialLinks.map((link) => (
-            <div key={link.id} className="flex gap-2">
-              <div className="flex items-center justify-center w-10 h-10 bg-zinc-100 rounded-md text-xs font-bold text-zinc-500 uppercase">
-                {link.platform.slice(0, 2)}
-              </div>
-              <input
-                type="url"
-                placeholder="https://..."
-                value={link.url}
-                onChange={(e) => updateSocialLink(link.id, e.target.value)}
-                className="flex-1 border rounded-md px-3 text-sm focus:border-zinc-800 outline-none"
-              />
-              <button
-                onClick={() => removeSocialLink(link.id)}
-                className="text-zinc-400 hover:text-red-500 px-2"
-              >
-                <TrashIcon />
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={addSocialLink}
-            className="text-sm text-sky-600 hover:underline self-start"
-          >
-            + Add Link
-          </button>
+        <div className="p-5 rounded-xl border border-zinc-200 bg-white shadow-sm flex flex-col gap-6">
+          
+          {/* Input Teks Ajakan */}
+          <div className="flex flex-col gap-3">
+             <label className="text-sm font-semibold text-zinc-700 flex items-center gap-2">
+               <MessageIcon /> Invitation Message
+             </label>
+             <div className="relative group">
+                <textarea
+                  value={connectMsg}
+                  onChange={(e) => setConnectMsg(e.target.value)}
+                  placeholder="e.g. 'I'm currently open for new opportunities. Let's build something amazing together!'"
+                  rows={3}
+                  maxLength={200}
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-all resize-none"
+                />
+                {/* Character Counter */}
+                <div className="absolute bottom-3 right-3 text-[10px] text-zinc-400 bg-zinc-50/80 px-1 rounded">
+                  {connectMsg.length}/200
+                </div>
+             </div>
+             <p className="text-xs text-zinc-500">
+               This text will be displayed prominently above your contact links. Make it welcoming!
+             </p>
+          </div>
+
+          <hr className="border-dashed border-zinc-200" />
+
+          {/* Email */}
+          <div>
+            <label className="text-sm font-medium text-zinc-700 mb-1.5 block">Contact Email</label>
+            <input
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none transition-colors"
+            />
+          </div>
+
+          {/* Social Links */}
+          <div>
+             <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-zinc-700">Social Links</label>
+             </div>
+             
+             <div className="flex flex-col gap-3">
+               {socialLinks.map((link) => (
+                 <div key={link.id} className="flex gap-2">
+                   <select
+                     value={link.platform}
+                     onChange={(e) => updateSocialLink(link.id, 'platform', e.target.value)}
+                     className="w-32 rounded-lg border border-zinc-300 px-3 py-2 text-sm bg-white"
+                   >
+                     <option value="twitter">Twitter / X</option>
+                     <option value="github">GitHub</option>
+                     <option value="linkedin">LinkedIn</option>
+                     <option value="instagram">Instagram</option>
+                     <option value="telegram">Telegram</option>
+                     <option value="medium">Medium</option>
+                     <option value="website">Website</option>
+                   </select>
+                   <input
+                     type="text"
+                     value={link.url}
+                     onChange={(e) => updateSocialLink(link.id, 'url', e.target.value)}
+                     placeholder="https://..."
+                     className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+                   />
+                   <button
+                     onClick={() => removeSocialLink(link.id)}
+                     className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
+                   >
+                     <TrashIcon />
+                   </button>
+                 </div>
+               ))}
+               
+               <button
+                 onClick={addSocialLink}
+                 className="flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-dashed border-zinc-300 text-sm text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all mt-1"
+               >
+                 <PlusIcon /> Add Social Link
+               </button>
+             </div>
+          </div>
         </div>
       </section>
     </div>

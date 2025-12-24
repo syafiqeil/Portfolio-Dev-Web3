@@ -245,7 +245,7 @@ const ActivityCard = () => {
             </h3>
 
             {certificates.length > 0 ? (
-              <div className="grid-cols-2 md:grid gap-3 content-start">
+              <div className="grid grid-cols-2 gap-3 content-start">
                 {certificates.slice(0, 4).map((cert) => (
                   <button
                     key={cert.id}
@@ -305,6 +305,15 @@ const ActivityCard = () => {
             <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider">
               Connect
             </h3>
+
+            {activity?.connectMsg && (
+              <div className="mb-2 p-3 bg-gradient-to-br from-zinc-50 to-white rounded-lg border border-zinc-100 shadow-sm">
+                <p className="text-sm text-zinc-700 italic font-medium leading-relaxed">
+                  "{activity.connectMsg}"
+                </p>
+              </div>
+            )}
+            
             <div className="flex flex-col gap-2">
               {contactEmail && (
                 <a

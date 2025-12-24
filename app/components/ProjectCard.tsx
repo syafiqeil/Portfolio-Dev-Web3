@@ -202,7 +202,7 @@ const ProjectCard = () => {
         </div>
 
         {/* Area Scroll Horizontal */}
-        <div className="flex-1 w-full overflow-hidden relative mt-2">
+        <div className="flex-1 w-full overflow-hidden relative mt-2 min-h-[300px] md:min-h-0">
           {allProjects.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center p-6 text-zinc-500">
               <p>No projects yet.</p>

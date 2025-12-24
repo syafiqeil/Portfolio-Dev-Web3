@@ -107,7 +107,8 @@ export interface Profile {
     blogPosts: BlogPost[];      
     certificates: Certificate[]; 
     socialLinks: SocialLink[];   
-    contactEmail?: string;      
+    contactEmail?: string;    
+    connectMsg?: string;  
   };
   imageUrl?: string | null;
   readmeUrl?: string | null;
