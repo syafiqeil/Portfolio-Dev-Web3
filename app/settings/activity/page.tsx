@@ -47,6 +47,12 @@ const ImageIcon = () => (
   </svg>
 );
 
+const MessageIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
 export default function ActivitySettingsPage() {
   const { profile, saveDraft, isHydrated } = useAnimationStore();
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -55,7 +61,8 @@ export default function ActivitySettingsPage() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); 
+  const [connectMsg, setConnectMsg] = useState("");
 
   // Refs untuk input file (hidden)
   const blogImageRef = useRef<HTMLInputElement>(null);
@@ -158,18 +165,36 @@ export default function ActivitySettingsPage() {
       { id: `social_${Date.now()}`, platform: "website", url: "" },
     ]);
   };
-  const updateSocialLink = (id: string, url: string) => {
-    let platform = "website";
-    if (url.includes("twitter.com") || url.includes("x.com"))
-      platform = "twitter";
-    else if (url.includes("t.me") || url.includes("telegram"))
-      platform = "telegram";
-    else if (url.includes("medium.com")) platform = "medium";
-    else if (url.includes("linkedin.com")) platform = "linkedin";
-    else if (url.includes("discord")) platform = "discord";
-
+  const updateSocialLink = (id: string, field: keyof SocialLink, value: string) => {
     setSocialLinks((links) =>
-      links.map((l) => (l.id === id ? { ...l, url, platform } : l))
+      links.map((l) => {
+        if (l.id !== id) return l;
+
+        // Jika yang diubah adalah URL, kita lakukan deteksi platform otomatis
+        if (field === 'url') {
+           let platform = l.platform;
+           const urlLower = value.toLowerCase();
+           
+           if (urlLower.includes("twitter.com") || urlLower.includes("x.com"))
+             platform = "twitter";
+           else if (urlLower.includes("t.me") || urlLower.includes("telegram"))
+             platform = "telegram";
+           else if (urlLower.includes("medium.com")) platform = "medium";
+           else if (urlLower.includes("linkedin.com")) platform = "linkedin";
+           else if (urlLower.includes("discord")) platform = "discord";
+           else if (urlLower.includes("instagram")) platform = "instagram";
+           else if (urlLower.includes("github")) platform = "github";
+
+           return { ...l, url: value, platform };
+        }
+
+        // Jika yang diubah adalah Platform (Dropdown), update platform saja
+        if (field === 'platform') {
+           return { ...l, platform: value };
+        }
+
+        return l;
+      })
     );
   };
   const removeSocialLink = (id: string) => {
@@ -415,8 +440,8 @@ export default function ActivitySettingsPage() {
             <label className="text-sm font-medium text-zinc-700 mb-1.5 block">Contact Email</label>
             <input
               type="email"
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-900 focus:outline-none transition-colors"
             />

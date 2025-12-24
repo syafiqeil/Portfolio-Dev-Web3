@@ -307,44 +307,44 @@ const ActivityCard = () => {
             </h3>
 
             {activity?.connectMsg && (
-              <div className="mb-2 p-3 bg-gradient-to-br from-zinc-50 to-white rounded-lg border border-zinc-100 shadow-sm">
-                <p className="text-sm text-zinc-700 italic font-medium leading-relaxed">
+              <div className="p-3 bg-gradient-to-br from-zinc-50 to-white rounded-lg border">
+                <p className="text-sm text-zinc-700 mb-6 italic font-medium leading-relaxed">
                   "{activity.connectMsg}"
                 </p>
+
+                <div className="flex flex-col gap-2">
+                  {contactEmail && (
+                    <a
+                      href={`mailto:${contactEmail}`}
+                      className="flex items-center gap-3 p-2 border border-zinc-300 rounded-md hover:bg-zinc-50 transition-colors group"
+                    >
+                      <div className="text-zinc-400 group-hover:text-zinc-900">
+                        <MailIcon />
+                      </div>
+                      <span className="text-sm text-zinc-600 truncate">
+                        {contactEmail}
+                      </span>
+                    </a>
+                  )}
+                  {socialLinks.map((link) => (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-2 border border-zinc-300 rounded-md hover:bg-zinc-50 transition-colors group"
+                    >
+                      <div className="text-zinc-400 group-hover:text-zinc-900">
+                        <SocialIcon platform={link.platform} />
+                      </div>
+                      <span className="text-sm text-zinc-600 capitalize">
+                        {link.platform}
+                      </span>
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
-            
-            <div className="flex flex-col gap-2">
-              {contactEmail && (
-                <a
-                  href={`mailto:${contactEmail}`}
-                  className="flex items-center gap-3 p-2 border rounded-md hover:bg-zinc-50 transition-colors group"
-                >
-                  <div className="text-zinc-400 group-hover:text-zinc-900">
-                    <MailIcon />
-                  </div>
-                  <span className="text-sm text-zinc-600 truncate">
-                    {contactEmail}
-                  </span>
-                </a>
-              )}
-              {socialLinks.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-2 border rounded-md hover:bg-zinc-50 transition-colors group"
-                >
-                  <div className="text-zinc-400 group-hover:text-zinc-900">
-                    <SocialIcon platform={link.platform} />
-                  </div>
-                  <span className="text-sm text-zinc-600 capitalize">
-                    {link.platform}
-                  </span>
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </div>
