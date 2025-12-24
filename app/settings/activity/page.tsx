@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useAnimationStore, BlogPost, Certificate, SocialLink} from "@/app/lib/SessionProvider";
 import { useDebounce, resolveIpfsUrl } from "@/app/lib/utils";
+import BudgetCard from "@/app/components/BudgetCard";
 
 // Ikon Helper
 const TrashIcon = () => (
@@ -236,6 +237,13 @@ export default function ActivitySettingsPage() {
 
   return (
     <div className="flex flex-col gap-10">
+      {/* BUDGET CARD */}
+      <section>
+        <BudgetCard />
+      </section>
+
+      <hr className="border-zinc-200" />
+
       {/* Hidden Inputs */}
       <input
         type="file"
