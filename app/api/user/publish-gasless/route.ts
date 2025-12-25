@@ -2,57 +2,91 @@
 
 import { NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
-import { createWalletClient, http, publicActions, parseEther } from 'viem';
+import { createWalletClient, http, publicActions } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { baseSepolia } from 'viem/chains';
-import UserProfileABI from '@/app/lib/UserProfileABI.json'; 
-import { USER_PROFILE_CONTRACT_ADDRESS } from '@/app/lib/SessionProvider'; 
+import { baseSepolia, base } from 'viem/chains';
+import { getIronSession } from 'iron-session'; // [Security]
+import { cookies } from 'next/headers';        // [Security]
+import { sessionOptions } from '@/app/lib/session'; // [Security]
+// Pastikan Anda sudah memindahkan konstanta ini ke file terpisah seperti saran sebelumnya
+// Jika belum, sesuaikan path importnya.
+import { USER_PROFILE_CONTRACT_ADDRESS } from '@/app/lib/contracts'; 
+import UserProfileABI from '@/app/lib/UserProfileABI.json';
 
 // --- KONFIGURASI ---
-// 1. Setup Wallet Server (Relayer)
 const account = privateKeyToAccount(process.env.SERVER_PRIVATE_KEY as `0x${string}`);
+// Pilih chain berdasarkan environment
+const currentChain = process.env.NODE_ENV === "production" ? base : baseSepolia;
+
 const client = createWalletClient({
   account,
-  chain: baseSepolia,
+  chain: currentChain,
   transport: http()
 }).extend(publicActions);
 
-// 2. Strategi Monetisasi (Markup)
-const FLAT_SERVICE_FEE_USD = 0.50; // Kita ambil untung $0.50 per update
-const ETH_PRICE_ESTIMATE = 3000;   // Hardcoded sementara (ideally fetch live price)
-const FLAT_SERVICE_FEE_ETH = FLAT_SERVICE_FEE_USD / ETH_PRICE_ESTIMATE; 
-const GAS_MULTIPLIER = 1.2; // Buffer 20% untuk fluktuasi gas
+// Strategi Monetisasi
+const FLAT_SERVICE_FEE_USD = 0.50; 
+const GAS_MULTIPLIER = 1.2; 
+
+// [Dynamic Price] Helper untuk mengambil harga ETH terkini
+async function getEthPriceInUsd(): Promise<number> {
+  try {
+    // Menggunakan API CoinGecko (Free Tier)
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', 
+      { next: { revalidate: 60 } } // Cache harga selama 60 detik
+    );
+    const data = await res.json();
+    const price = data?.ethereum?.usd;
+    if (price) return price;
+    throw new Error("Price API failed");
+  } catch (error) {
+    console.warn("Gagal mengambil harga ETH, menggunakan fallback $3000.");
+    return 3000; // Fallback aman jika API error
+  }
+}
 
 export async function POST(req: Request) {
   try {
+    // --- 1. [Security Fix] VERIFIKASI SESI ---
+    const session = await getIronSession(await cookies(), sessionOptions);
+    if (!session.address) {
+      return NextResponse.json({ error: "Unauthorized: Silakan login terlebih dahulu." }, { status: 401 });
+    }
+
     const { userAddress, newCid } = await req.json();
 
-    // --- A. VALIDASI INPUT (Menjawab Minor Note #3) ---
-    // Cek format CID IPFS sederhana (biasanya starts with Qm (v0) atau bafy (v1))
+    // Validasi: Pastikan yang request adalah pemilik alamat tersebut
+    if (userAddress.toLowerCase() !== session.address.toLowerCase()) {
+      return NextResponse.json({ error: "Forbidden: Anda tidak bisa mengubah profil orang lain." }, { status: 403 });
+    }
+
+    // --- 2. VALIDASI INPUT ---
     if (!newCid || typeof newCid !== 'string') {
        return NextResponse.json({ error: "CID tidak valid." }, { status: 400 });
     }
-    // Validasi panjang CID (CIDv0 = 46 chars, CIDv1 bisa lebih panjang)
     if (newCid.length < 46 || newCid.length > 100) {
        return NextResponse.json({ error: "Format CID IPFS mencurigakan." }, { status: 400 });
     }
 
-    // --- B. RATE LIMITING & SECURITY CHECK (Menjawab Minor Note #2) ---
-    // Kita bisa cek kapan terakhir kali user ini update
+    // --- 3. RATE LIMITING ---
     const lastUpdateKey = `last_update_${userAddress.toLowerCase()}`;
     const lastUpdate = await kv.get<number>(lastUpdateKey);
     const now = Date.now();
     
-    // Batasi update max 1x per menit (mencegah spam)
     if (lastUpdate && now - lastUpdate < 60000) {
         return NextResponse.json({ 
             error: "Terlalu cepat! Harap tunggu 1 menit sebelum update lagi." 
         }, { status: 429 });
     }
 
-    // --- C. ESTIMASI BIAYA & MARKUP (Monetisasi) ---
+    // --- 4. [Dynamic Price] ESTIMASI BIAYA ---
     
-    // 1. Simulasi Kontrak untuk hitung Gas Unit
+    // Ambil harga ETH live
+    const ethPriceUsd = await getEthPriceInUsd();
+    const flatServiceFeeEth = FLAT_SERVICE_FEE_USD / ethPriceUsd;
+
+    // Simulasi Kontrak
     const { request } = await client.simulateContract({
       address: USER_PROFILE_CONTRACT_ADDRESS as `0x${string}`,
       abi: UserProfileABI,
@@ -64,38 +98,33 @@ export async function POST(req: Request) {
     const gasPrice = await client.getGasPrice();
     const gasLimit = request.gas || 0n;
 
-    // Biaya Asli (Real Cost to Blockchain)
     const realCostWei = gasLimit * gasPrice;
     const realCostEth = Number(realCostWei) / 1e18;
 
-    // Biaya Tagihan ke User (Markup)
-    // Rumus: (Biaya Gas Asli * 1.2) + Fee Tetap Server
-    const chargeToUserEth = (realCostEth * GAS_MULTIPLIER) + FLAT_SERVICE_FEE_ETH;
+    // Total Biaya = (Gas * Multiplier) + Service Fee
+    const chargeToUserEth = (realCostEth * GAS_MULTIPLIER) + flatServiceFeeEth;
 
-    console.log(`[x402] Real Cost: ${realCostEth} ETH | Charging User: ${chargeToUserEth} ETH`);
+    console.log(`[x402] ETH Price: $${ethPriceUsd} | Cost: ${chargeToUserEth.toFixed(6)} ETH`);
 
-    // --- D. CEK BUDGET (x402 Logic) ---
+    // --- 5. CEK BUDGET ---
     const budgetKey = `budget_${userAddress.toLowerCase()}`;
     const currentBudgetStr = await kv.get<string>(budgetKey);
     const currentBudget = currentBudgetStr ? parseFloat(currentBudgetStr) : 0;
 
     if (currentBudget < chargeToUserEth) {
         return NextResponse.json({ 
-            error: `Saldo Budget tidak cukup. Biaya update: ~${chargeToUserEth.toFixed(6)} ETH`,
-            cost: chargeToUserEth
+            error: `Saldo Budget tidak cukup. Biaya: ~${chargeToUserEth.toFixed(5)} ETH ($${(chargeToUserEth * ethPriceUsd).toFixed(2)})`,
+            cost: chargeToUserEth,
+            currentBudget
         }, { status: 402 });
     }
 
-    // --- E. EKSEKUSI TRANSAKSI (Server Sign) ---
+    // --- 6. EKSEKUSI & UPDATE DATABASE ---
     const hash = await client.writeContract(request);
 
-    // --- F. DATABASE UPDATE ---
-    
-    // 1. Potong Saldo User
+    // Potong Saldo & Update Timestamp
     const newBudget = currentBudget - chargeToUserEth;
     await kv.set(budgetKey, newBudget.toString());
-
-    // 2. Update Timestamp Rate Limiter
     await kv.set(lastUpdateKey, now);
 
     return NextResponse.json({ 
@@ -107,10 +136,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Gasless Publish Error:", error);
-    // Handle specific contract revert errors
-    if (error.message?.includes("CID cannot be empty")) {
-        return NextResponse.json({ error: "Data CID kosong ditolak kontrak." }, { status: 400 });
-    }
-    return NextResponse.json({ error: "Gagal memproses transaksi on-chain." }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Gagal memproses transaksi." }, { status: 500 });
   }
 }

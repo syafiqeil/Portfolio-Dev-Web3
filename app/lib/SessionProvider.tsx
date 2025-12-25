@@ -21,9 +21,9 @@ import {
 } from 'wagmi'; 
 import { SiweMessage } from 'siwe';
 import { resolveIpfsUrl } from './utils';
+import { USER_PROFILE_CONTRACT_ADDRESS } from './contracts';
 
-// --- ALAMAT & ABI KONTRAK ---
-export const USER_PROFILE_CONTRACT_ADDRESS = "0x4694069521A86006F72f34714C0952d25fb79982";
+// --- ABI KONTRAK ---
 export const userProfileAbi = [
 	{
 		"inputs": [],
@@ -412,14 +412,16 @@ const ProfileLoader = ({ children }: { children: ReactNode }) => {
       let loadedDraft: Profile | null = null;
       let serverProfile: Profile | null = null;
 
-      // 1. COBA AMBIL DARI SERVER KV (Data paling fresh/instan)
+      // 1. COBA AMBIL DARI SERVER KV
       try {
-        const res = await fetch('/api/user/profile');
+        // [Caching Fix] Tambahkan { cache: 'no-store' }
+        const res = await fetch('/api/user/profile', { cache: 'no-store' });
+        
         if (res.ok) {
           const data = await res.json();
           if (data.profile) {
             serverProfile = data.profile;
-            console.log("Loaded profile from KV (Fast Cache)");
+            console.log("Loaded profile from KV");
           }
         }
       } catch (e) {
