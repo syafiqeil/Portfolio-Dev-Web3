@@ -25,7 +25,7 @@ const client = createWalletClient({
 }).extend(publicActions);
 
 // Strategi Monetisasi
-const FLAT_SERVICE_FEE_USD = 0.50; 
+const FLAT_SERVICE_FEE_USD = 0.01; 
 const GAS_MULTIPLIER = 1.2; 
 
 // [Dynamic Price] Helper untuk mengambil harga ETH terkini

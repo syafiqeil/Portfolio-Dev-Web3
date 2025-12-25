@@ -475,7 +475,7 @@ export default function ProfileSettingsPage() {
           </div>
           
           <p className="text-[10px] text-zinc-400 text-right">
-            Estimasi biaya: ~$0.50 - $0.80 (tergantung gas)
+            Estimasi biaya: ~$0.01 - $0.03 (tergantung gas)
           </p>
         </div>
       </div>
