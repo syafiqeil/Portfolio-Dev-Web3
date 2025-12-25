@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useAnimationStore } from "@/app/lib/useAnimationStore";
 import { useRouter } from "next/navigation";
 import { resolveIpfsUrl, useDebounce } from "@/app/lib/utils";
+import { useAccount } from "wagmi";
 import Link from "next/link";
 
 const ImageIcon = () => (
@@ -72,6 +73,7 @@ export default function ProfileSettingsPage() {
     logout,
   } = useAnimationStore();
 
+  const { address } = useAccount();
   const router = useRouter();
 
   // --- State LOKAL untuk form ---
@@ -159,7 +161,17 @@ export default function ProfileSettingsPage() {
       });
 
       if (!uploadRes.ok) throw new Error("Gagal mengupload data ke IPFS");
-      const { cid } = await uploadRes.json();
+
+      const responseData = await uploadRes.json();
+      
+      // Ambil "ipfsHash" sesuai output dari file route.ts, bukan "cid"
+      const cid = responseData.ipfsHash; 
+
+      if (!cid) {
+          console.error("Respon Server:", responseData); // Untuk debugging jika masih error
+          throw new Error("Gagal mendapatkan CID dari server.");
+      }
+      
       console.log("IPFS Upload Success, CID:", cid);
 
       // 3. Panggil API Gasless (Relayer)
@@ -168,7 +180,7 @@ export default function ProfileSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userAddress: address,
-          newCid: cid
+          newCid: cid // Sekarang variabel ini sudah berisi string hash yang benar
         }),
       });
 

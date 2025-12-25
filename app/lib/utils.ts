@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 
 const IPFS_GATEWAY = 'https://gateway.pinata.cloud';
 
-export const USER_PROFILE_CONTRACT_ADDRESS = "0x4694069521A86006F72f34714C0952d25fb79982";
-
 export const resolveIpfsUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
 

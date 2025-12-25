@@ -6,7 +6,7 @@ import { createWalletClient, http, publicActions, parseEther } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { baseSepolia } from 'viem/chains';
 import UserProfileABI from '@/app/lib/UserProfileABI.json'; 
-import { USER_PROFILE_CONTRACT_ADDRESS } from '@/app/lib/constants'; // Pastikan address disimpan di sini
+import { USER_PROFILE_CONTRACT_ADDRESS } from '@/app/lib/SessionProvider'; 
 
 // --- KONFIGURASI ---
 // 1. Setup Wallet Server (Relayer)
