@@ -231,7 +231,7 @@ const ActivityCard = () => {
                 })}
               </div>
             ) : (
-              <div className="h-24 border border-dashed border-zinc-200 rounded-md flex items-center justify-center text-zinc-400 text-xs">
+              <div className="h-24 border border-dashed border-zinc-200 bg-zinc-100/50 rounded-md flex items-center justify-center text-zinc-400 text-xs">
                 No blogs posted yet.
               </div>
             )}
@@ -282,14 +282,14 @@ const ActivityCard = () => {
                     (_, i) => (
                       <div
                         key={i}
-                        className="w-full aspect-video rounded-md border border-dashed border-zinc-200 bg-zinc-50/30 flex flex-col items-center justify-center gap-2"
+                        className="w-full aspect-video rounded-md border border-dashed border-zinc-200 bg-zinc-50/30 flex flex-col items-center justify-center"
                       >
                         <div className="w-full flex-1 rounded-md bg-zinc-100/50 flex items-center justify-center">
                           <span className="text-zinc-300 text-[10px]">
                             Empty
                           </span>
                         </div>
-                        <div className="h-2.5 w-12 bg-zinc-100 rounded-full flex-shrink-0" />
+                        <div className="h-2.5 w-12 m-2 bg-zinc-100 rounded-full flex-shrink-0" />
                       </div>
                     )
                   )}

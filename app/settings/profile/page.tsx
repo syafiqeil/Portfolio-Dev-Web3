@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useAnimationStore } from "@/app/lib/useAnimationStore";
 import { useRouter } from "next/navigation";
 import { resolveIpfsUrl, useDebounce } from "@/app/lib/utils";
+import Link from "next/link";
 
 const ImageIcon = () => (
   <svg
@@ -128,6 +129,78 @@ export default function ProfileSettingsPage() {
       }
     }
   }, [profile, isHydrated]);
+
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishStatus, setPublishStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
+
+  const handleGaslessPublish = async () => {
+    if (!address) {
+      alert("Mohon hubungkan wallet Anda terlebih dahulu.");
+      return;
+    }
+
+    setIsPublishing(true);
+    setPublishStatus({ type: null, msg: '' });
+
+    try {
+      // 1. Siapkan Data Profil
+      const profileData = {
+        name,
+        bio,
+        updatedAt: new Date().toISOString(),
+        // Tambahkan field lain yang relevan
+      };
+
+      // 2. Upload JSON ke IPFS (Melalui API kita)
+      // Pastikan Anda memiliki route app/api/upload-json/route.ts
+      const uploadRes = await fetch("/api/upload-json", {
+        method: "POST",
+        body: JSON.stringify(profileData),
+      });
+
+      if (!uploadRes.ok) throw new Error("Gagal mengupload data ke IPFS");
+      const { cid } = await uploadRes.json();
+      console.log("IPFS Upload Success, CID:", cid);
+
+      // 3. Panggil API Gasless (Relayer)
+      const publishRes = await fetch("/api/user/publish-gasless", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userAddress: address,
+          newCid: cid
+        }),
+      });
+
+      const result = await publishRes.json();
+
+      // 4. Handle Response
+      if (publishRes.status === 402) {
+        // KHUSUS: Saldo Kurang
+        setPublishStatus({ 
+          type: 'error', 
+          msg: `Saldo Budget Tidak Cukup! Dibutuhkan sekitar ${result.cost?.toFixed(5)} ETH.` 
+        });
+      } else if (!publishRes.ok) {
+        throw new Error(result.error || "Gagal melakukan update on-chain.");
+      } else {
+        // SUKSES
+        setPublishStatus({ 
+          type: 'success', 
+          msg: `Sukses! Profil terupdate di Blockchain. Saldo sisa: ${result.remainingBudget.toFixed(5)} ETH` 
+        });
+        
+        // Opsional: Simpan draft lokal juga agar sinkron
+        saveDraft({ name, bio });
+      }
+
+    } catch (error: any) {
+      console.error(error);
+      setPublishStatus({ type: 'error', msg: error.message || "Terjadi kesalahan sistem." });
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   // --- 2. Buat Draf Debounced ---
   const debouncedDraft = useDebounce(
@@ -333,6 +406,67 @@ export default function ProfileSettingsPage() {
           </div>
         </div>
       </section>
+
+      <div className="mt-8 pt-6 border-t border-zinc-100">
+        <div className="flex flex-col gap-4">
+          
+          {/* Status Message Area */}
+          {publishStatus.msg && (
+            <div className={`p-4 rounded-lg text-sm border ${
+              publishStatus.type === 'error' 
+                ? 'bg-red-50 border-red-100 text-red-700' 
+                : 'bg-green-50 border-green-100 text-green-700'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span>{publishStatus.msg}</span>
+                {/* Jika Error Saldo (402), Munculkan Link Deposit */}
+                {publishStatus.msg.includes("Saldo Budget") && (
+                  <Link href="/settings/activity" className="underline font-bold hover:text-red-900">
+                    Top Up Sekarang &rarr;
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-zinc-900">On-Chain Sync</span>
+              <span className="text-xs text-zinc-500">
+                Simpan permanen ke Blockchain. Biaya diambil dari Budget x402.
+              </span>
+            </div>
+
+            <button
+              onClick={handleGaslessPublish}
+              disabled={isPublishing || !address}
+              className={`
+                relative overflow-hidden rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all
+                ${isPublishing ? 'bg-zinc-400 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700'}
+              `}
+            >
+              {isPublishing ? (
+                <div className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Processing...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span>Publish Gasless</span>
+                  {/* Badge Petir */}
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">
+                    ⚡
+                  </span>
+                </div>
+              )}
+            </button>
+          </div>
+          
+          <p className="text-[10px] text-zinc-400 text-right">
+            Estimasi biaya: ~$0.50 - $0.80 (tergantung gas)
+          </p>
+        </div>
+      </div>
 
       <hr className="my-4 border-zinc-200" />
 
