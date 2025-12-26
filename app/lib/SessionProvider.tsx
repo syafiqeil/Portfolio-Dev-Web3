@@ -687,35 +687,87 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         delete project.pendingMediaFile;
       }
       
-      // 2. Upload Master JSON
+      // 1. Upload Master JSON ke IPFS
       const masterCID = await uploadJsonToApi(dataToUpload);
       console.log("Master CID didapat:", masterCID);
 
-      // 3. Panggil Smart Contract
-      await writeContractAsync({
-        address: USER_PROFILE_CONTRACT_ADDRESS,
-        abi: userProfileAbi,
-        functionName: 'setProfileCID',
-        args: [masterCID],
-      });
+      // 2. COBA PUBLISH VIA GASLESS (RAG SYSTEM)
+      let txHash = "";
+      let isGaslessSuccess = false;
 
-      // 4. Vercel KV (Cache)
+      try {
+        const gaslessResponse = await fetch('/api/user/publish-gasless', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userAddress: address,
+            newCid: masterCID
+          }),
+        });
+
+        const gaslessResult = await gaslessResponse.json();
+
+        if (gaslessResponse.status === 402) {
+           // TANGKAP KONDISI SALDO HABIS
+           throw new Error("RAG_INSUFFICIENT_FUNDS");
+        }
+
+        if (!gaslessResponse.ok) {
+           throw new Error(gaslessResult.error || "Gasless API Error");
+        }
+
+        // Jika sukses gasless
+        txHash = gaslessResult.txHash;
+        isGaslessSuccess = true;
+        alert(`Sukses! Update via Gasless RAG.\nSisa Budget: ${gaslessResult.remainingBudget} ETH`);
+
+      } catch (gaslessError: any) {
+        // 3. LOGIKA FALLBACK (JIKA GASLESS GAGAL)
+        
+        if (gaslessError.message === "RAG_INSUFFICIENT_FUNDS") {
+           // Beritahu user
+           const proceedManual = confirm(
+             "⚠️ Saldo RAG/Budget Anda habis.\n\nSistem akan beralih menggunakan Wallet pribadi Anda (Gas berbayar).\nLanjutkan?"
+           );
+
+           if (!proceedManual) {
+             setIsPublishing(false);
+             return; // User membatalkan
+           }
+
+           // Eksekusi Manual (Fallback)
+           console.log("Switching to manual wallet execution...");
+           txHash = await writeContractAsync({
+              address: USER_PROFILE_CONTRACT_ADDRESS,
+              abi: userProfileAbi,
+              functionName: 'setProfileCID',
+              args: [masterCID],
+           });
+           
+           alert("Sukses! Profil diperbarui menggunakan Wallet Pribadi.");
+
+        } else {
+           // Jika errornya bukan karena saldo (misal server down), tetap lempar error
+           throw gaslessError;
+        }
+      }
+
+      // 4. Update Database Lokal (Vercel KV) agar sinkron
+      // Langkah ini dijalankan baik via Gasless maupun Manual
       await fetch('/api/user/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToUpload),
       });
 
-      // 5. Perbarui state React & Hapus Draf
+      // 5. Finalisasi State
       setProfile(dataToUpload); 
       localStorage.removeItem(`draftProfile_${address}`);
       (window as any).__onChainProfile = dataToUpload;
 
-      alert("Success! Your changes have been published on-chain.");
-
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to publish:", error);
-      alert(`Failed to publish: ${(error as Error).message}`);
+      alert(`Gagal mempublikasikan profil: ${error.message}`);
     } finally {
       setIsPublishing(false);
     }
