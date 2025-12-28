@@ -13,4 +13,3 @@ It demonstrates modern UI/UX patterns in blockchain development, including inter
 To ensure security and operational integrity, the backend logic (Gasless Relayer, Budget System, and Private Keys) is hosted in a separate **private repository**. 
 This public repo serves as a technical showcase of the client-side implementation.
 
-[Link to Live Demo] | [Link to My LinkedIn]
