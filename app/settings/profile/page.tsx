@@ -6,8 +6,6 @@ import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useAnimationStore } from "@/app/lib/useAnimationStore";
 import { useRouter } from "next/navigation";
 import { resolveIpfsUrl, useDebounce } from "@/app/lib/utils";
-import { useAccount } from "wagmi";
-import Link from "next/link";
 
 const ImageIcon = () => (
   <svg
@@ -23,24 +21,6 @@ const ImageIcon = () => (
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
     <circle cx="8.5" cy="8.5" r="1.5" />
     <polyline points="21 15 16 10 5 21" />
-  </svg>
-);
-const FileTextIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <line x1="10" y1="9" x2="8" y2="9" />
   </svg>
 );
 const TrashIcon = () => (
@@ -73,7 +53,6 @@ export default function ProfileSettingsPage() {
     logout,
   } = useAnimationStore();
 
-  const { address } = useAccount();
   const router = useRouter();
 
   // --- State LOKAL untuk form ---
@@ -93,8 +72,6 @@ export default function ProfileSettingsPage() {
   const isDirty = useRef(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const readmeInputRef = useRef<HTMLInputElement>(null);
-
-  const isInitialLoadDone = useRef(false);
 
   // --- 1. Muat data dari Global ke Lokal saat komponen dimuat ---
   useEffect(() => {
@@ -132,88 +109,6 @@ export default function ProfileSettingsPage() {
     }
   }, [profile, isHydrated]);
 
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [publishStatus, setPublishStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
-
-  const handleGaslessPublish = async () => {
-    if (!address) {
-      alert("Mohon hubungkan wallet Anda terlebih dahulu.");
-      return;
-    }
-
-    setIsPublishing(true);
-    setPublishStatus({ type: null, msg: '' });
-
-    try {
-      // 1. Siapkan Data Profil
-      const profileData = {
-        name,
-        bio,
-        updatedAt: new Date().toISOString(),
-        // Tambahkan field lain yang relevan
-      };
-
-      // 2. Upload JSON ke IPFS (Melalui API kita)
-      // Pastikan Anda memiliki route app/api/upload-json/route.ts
-      const uploadRes = await fetch("/api/upload-json", {
-        method: "POST",
-        body: JSON.stringify(profileData),
-      });
-
-      if (!uploadRes.ok) throw new Error("Gagal mengupload data ke IPFS");
-
-      const responseData = await uploadRes.json();
-      
-      // Ambil "ipfsHash" sesuai output dari file route.ts, bukan "cid"
-      const cid = responseData.ipfsHash; 
-
-      if (!cid) {
-          console.error("Respon Server:", responseData); // Untuk debugging jika masih error
-          throw new Error("Gagal mendapatkan CID dari server.");
-      }
-      
-      console.log("IPFS Upload Success, CID:", cid);
-
-      // 3. Panggil API Gasless (Relayer)
-      const publishRes = await fetch("/api/user/publish-gasless", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userAddress: address,
-          newCid: cid // Sekarang variabel ini sudah berisi string hash yang benar
-        }),
-      });
-
-      const result = await publishRes.json();
-
-      // 4. Handle Response
-      if (publishRes.status === 402) {
-        // KHUSUS: Saldo Kurang
-        setPublishStatus({ 
-          type: 'error', 
-          msg: `Saldo Budget Tidak Cukup! Dibutuhkan sekitar ${result.cost?.toFixed(5)} ETH.` 
-        });
-      } else if (!publishRes.ok) {
-        throw new Error(result.error || "Gagal melakukan update on-chain.");
-      } else {
-        // SUKSES
-        setPublishStatus({ 
-          type: 'success', 
-          msg: `Sukses! Profil terupdate di Blockchain. Saldo sisa: ${result.remainingBudget.toFixed(5)} ETH` 
-        });
-        
-        // Opsional: Simpan draft lokal juga agar sinkron
-        saveDraft({ name, bio });
-      }
-
-    } catch (error: any) {
-      console.error(error);
-      setPublishStatus({ type: 'error', msg: error.message || "Terjadi kesalahan sistem." });
-    } finally {
-      setIsPublishing(false);
-    }
-  };
-
   // --- 2. Buat Draf Debounced ---
   const debouncedDraft = useDebounce(
     {
@@ -234,7 +129,7 @@ export default function ProfileSettingsPage() {
   // --- 3. Auto-Save ke Global State ---
   useEffect(() => {
     // --- Pengecekan Kritis ---
-    // Jangan simpan jika belum loaded ATAU user belum menyentuh form (isDirty false)
+    // Jangan simpan jika belum loaded atau user belum menyentuh form (isDirty false)
     if (!hasLoaded || !isDirty.current) {
       return;
     }
@@ -245,7 +140,7 @@ export default function ProfileSettingsPage() {
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
-      isDirty.current = true; // [MARK DIRTY]
+      isDirty.current = true; 
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImagePreview(reader.result as string);
@@ -258,7 +153,7 @@ export default function ProfileSettingsPage() {
   const handleReadmeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && (file.name.endsWith(".md") || file.type === "text/markdown")) {
-      isDirty.current = true; // [MARK DIRTY]
+      isDirty.current = true; 
       const reader = new FileReader();
       reader.onloadend = () => {
         setReadmeFile(file);
@@ -273,7 +168,7 @@ export default function ProfileSettingsPage() {
   };
 
   const handleRemoveReadme = () => {
-    isDirty.current = true; // [MARK DIRTY]
+    isDirty.current = true; 
     setReadmeFile(null);
     setReadmeFileName(null);
     saveDraft({ readmeUrl: null, readmeName: null });
@@ -418,69 +313,6 @@ export default function ProfileSettingsPage() {
           </div>
         </div>
       </section>
-
-      <div className="mt-8 pt-6 border-t border-zinc-100">
-        <div className="flex flex-col gap-4">
-          
-          {/* Status Message Area */}
-          {publishStatus.msg && (
-            <div className={`p-4 rounded-lg text-sm border ${
-              publishStatus.type === 'error' 
-                ? 'bg-red-50 border-red-100 text-red-700' 
-                : 'bg-green-50 border-green-100 text-green-700'
-            }`}>
-              <div className="flex items-center justify-between">
-                <span>{publishStatus.msg}</span>
-                {/* Jika Error Saldo (402), Munculkan Link Deposit */}
-                {publishStatus.msg.includes("Saldo Budget") && (
-                  <Link href="/settings/activity" className="underline font-bold hover:text-red-900">
-                    Top Up Sekarang &rarr;
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-zinc-900">On-Chain Sync</span>
-              <span className="text-xs text-zinc-500">
-                Simpan permanen ke Blockchain. Biaya diambil dari Budget x402.
-              </span>
-            </div>
-
-            <button
-              onClick={handleGaslessPublish}
-              disabled={isPublishing || !address}
-              className={`
-                relative overflow-hidden rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-md transition-all
-                ${isPublishing ? 'bg-zinc-400 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700'}
-              `}
-            >
-              {isPublishing ? (
-                <div className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Processing...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span>Publish Gasless</span>
-                  {/* Badge Petir */}
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">
-                    ⚡
-                  </span>
-                </div>
-              )}
-            </button>
-          </div>
-          
-          <p className="text-[10px] text-zinc-400 text-right">
-            Estimasi biaya: ~$0.01 - $0.03 (tergantung gas)
-          </p>
-        </div>
-      </div>
-
-      <hr className="my-4 border-zinc-200" />
 
       {/* Bagian 2: Animasi Bawaan */}
       <section>

@@ -322,8 +322,10 @@ export interface Project {
   tags: string[];
   isFeatured: boolean;
   gallery: string[];         // Array URL foto (Maks 7)
-  videoUrl?: string | null;  // URL Video
-  videoThumbnail?: string | null; // Cover Video
+  videoUrl?: string | null;  
+  videoStartTime?: number; 
+  videoEndTime?: number;
+  videoThumbnail?: string | null; 
 
   // File Mentah untuk Upload (Local Draft)
   pendingGalleryFiles?: File[];
@@ -338,8 +340,8 @@ export interface Project {
 // --- Tipe Konteks ---
 interface SessionContextType {
   isAuthenticated: boolean;
-  isLoading: boolean; // Loading sesi
-  isProfileLoading: boolean; // Loading data profil
+  isLoading: boolean; 
+  isProfileLoading: boolean; 
   profile: Profile | null; 
   
   login: () => Promise<void>;
@@ -578,9 +580,66 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (!isAuthenticated || !address) return;
     
     setProfile(prev => {
+      // 1. Update State Full (Untuk UI)
+      // Kita tetap menyimpan file Base64 di sini agar preview di layar TIDAK hilang
       const newDraft = { ...(prev as Profile), ...dataToSave };
-      // Simpan ke localStorage secara otomatis
-      localStorage.setItem(`draftProfile_${address}`, JSON.stringify(newDraft));
+
+      // 2. Siapkan Versi "Ringan" untuk LocalStorage
+      // Kita buat salinan objek untuk dibersihkan dari file-file berat (Base64)
+      const draftForStorage = JSON.parse(JSON.stringify(newDraft));
+
+      // --- PEMBERSIHAN DATA BERAT SEBELUM SAVE KE STORAGE ---
+      
+      // A. Bersihkan Profile Image (jika masih preview lokal)
+      if (draftForStorage.imageUrl && draftForStorage.imageUrl.startsWith('data:')) {
+        draftForStorage.imageUrl = null; 
+      }
+      if (draftForStorage.readmeUrl && draftForStorage.readmeUrl.startsWith('data:')) {
+        draftForStorage.readmeUrl = null;
+      }
+
+      // B. Bersihkan Projects (Video & Gallery)
+      if (draftForStorage.projects) {
+        draftForStorage.projects = draftForStorage.projects.map((p: any) => ({
+          ...p,
+          // Jika videoUrl adalah Base64 (lokal), jangan simpan ke storage
+          videoUrl: p.videoUrl?.startsWith('data:') ? null : p.videoUrl,
+          // Jika thumbnail adalah Base64
+          videoThumbnail: p.videoThumbnail?.startsWith('data:') ? null : p.videoThumbnail,
+          // Filter gallery, buang yang Base64
+          gallery: p.gallery?.filter((img: string) => !img.startsWith('data:')) || [],
+          
+          // Pastikan file mentah tidak ikut (biasanya JSON.stringify sudah membuangnya, tapi untuk keamanan)
+          pendingVideoFile: undefined,
+          pendingVideoThumbnailFile: undefined,
+          pendingGalleryFiles: undefined
+        }));
+      }
+
+      // C. Bersihkan Activity (Blog & Certs)
+      if (draftForStorage.activity) {
+        if (draftForStorage.activity.blogPosts) {
+          draftForStorage.activity.blogPosts = draftForStorage.activity.blogPosts.map((b: any) => ({
+            ...b,
+            coverImage: b.coverImage?.startsWith('data:') ? null : b.coverImage
+          }));
+        }
+        if (draftForStorage.activity.certificates) {
+          draftForStorage.activity.certificates = draftForStorage.activity.certificates.map((c: any) => ({
+            ...c,
+            imageUrl: c.imageUrl?.startsWith('data:') ? null : c.imageUrl
+          }));
+        }
+      }
+
+      // 3. Simpan Versi Ringan ke LocalStorage
+      try {
+        localStorage.setItem(`draftProfile_${address}`, JSON.stringify(draftForStorage));
+      } catch (e) {
+        // Jika masih penuh, kita log warning saja agar aplikasi tidak crash
+        console.warn("LocalStorage Full: Auto-save skipped for heavy data.");
+      }
+
       return newDraft;
     });
   }, [isAuthenticated, address]);
@@ -622,9 +681,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     if (!profile || !address) return alert("Profile has not been loaded.");
     
     setIsPublishing(true);
+    // Copy profile agar tidak merusak tampilan UI saat proses
     let dataToUpload = JSON.parse(JSON.stringify(profile)); 
 
-    // --- FUNGSI HELPER Konversi data:url ke File ---
+    // --- FUNGSI HELPER ---
     const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File | null> => {
       try {
         const res = await fetch(dataUrl);
@@ -637,16 +697,19 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     };
     
     try {
+      // 1. PROSES PROFILE IMAGE
       if (dataToUpload.imageUrl && dataToUpload.imageUrl.startsWith('data:')) {
         const file = await dataUrlToFile(dataToUpload.imageUrl, "profile-image");
         if(file) dataToUpload.imageUrl = `ipfs://${await uploadFileToApi(file)}`;
       }
 
+      // 2. PROSES README
       if (dataToUpload.readmeUrl && dataToUpload.readmeUrl.startsWith('data:')) {
         const file = await dataUrlToFile(dataToUpload.readmeUrl, dataToUpload.readmeName || "README.md");
         if(file) dataToUpload.readmeUrl = `ipfs://${await uploadFileToApi(file)}`;
       }
 
+      // 3. PROSES ACTIVITY (BLOGS)
       if (dataToUpload.activity?.blogPosts) {
         for (const post of dataToUpload.activity.blogPosts) {
           if (post.coverImage && post.coverImage.startsWith('data:')) {
@@ -655,10 +718,11 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
               post.coverImage = `ipfs://${await uploadFileToApi(file)}`;
             }
           }
-          delete post.pendingCoverFile; // Bersihkan file mentah
+          delete post.pendingCoverFile;
         }
       }
 
+      // 4. PROSES ACTIVITY (CERTIFICATES)
       if (dataToUpload.activity?.certificates) {
         for (const cert of dataToUpload.activity.certificates) {
           if (cert.imageUrl && cert.imageUrl.startsWith('data:')) {
@@ -671,29 +735,80 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         }
       }
 
+      // 5. [BARU] PROSES PROJECTS (VIDEO, THUMBNAIL, GALLERY)
+      // Ini adalah bagian yang sebelumnya TERLEWAT sehingga menyebabkan loading lama
       for (const project of dataToUpload.projects) {
+        
+        // A. Video URL
+        if (project.videoUrl && project.videoUrl.startsWith('data:')) {
+            const file = await dataUrlToFile(project.videoUrl, `${project.name}-video.mp4`);
+            if (file) {
+                // Upload Video (Mungkin butuh waktu, tapi lebih cepat drpd upload JSON raksasa)
+                const hash = await uploadFileToApi(file);
+                project.videoUrl = `ipfs://${hash}`;
+            }
+        }
+
+        // B. Video Thumbnail
+        if (project.videoThumbnail && project.videoThumbnail.startsWith('data:')) {
+            const file = await dataUrlToFile(project.videoThumbnail, `${project.name}-thumb.png`);
+            if (file) {
+                const hash = await uploadFileToApi(file);
+                project.videoThumbnail = `ipfs://${hash}`;
+            }
+        }
+
+        // C. Gallery (Array)
+        if (project.gallery && project.gallery.length > 0) {
+            const newGallery = [];
+            for (let i = 0; i < project.gallery.length; i++) {
+                const img = project.gallery[i];
+                if (img.startsWith('data:')) {
+                    const file = await dataUrlToFile(img, `${project.name}-gal-${i}.png`);
+                    if (file) {
+                        const hash = await uploadFileToApi(file);
+                        newGallery.push(`ipfs://${hash}`);
+                    }
+                } else {
+                    // Jika sudah link IPFS/URL biasa, biarkan
+                    newGallery.push(img);
+                }
+            }
+            project.gallery = newGallery;
+        }
+
+        // D. Legacy Media (Cleanup)
         if (project.mediaPreview && project.mediaPreview.startsWith('data:')) {
           const file = await dataUrlToFile(project.mediaPreview, project.name || "project-media");
           if (file) {
             project.mediaIpfsUrl = `ipfs://${await uploadFileToApi(file)}`;
-            project.mediaPreview = null; // Hapus data:url yang besar
+            project.mediaPreview = null;
           }
         }
-      }
-      
-      delete dataToUpload.pendingImageFile;
-      delete dataToUpload.pendingReadmeFile;
-      for (const project of dataToUpload.projects) {
+        
+        // Hapus file mentah dari JSON final
+        delete project.pendingVideoFile;
+        delete project.pendingVideoThumbnailFile;
+        delete project.pendingGalleryFiles;
         delete project.pendingMediaFile;
       }
       
+      // Bersihkan root pending files
+      delete dataToUpload.pendingImageFile;
+      delete dataToUpload.pendingReadmeFile;
+      
+      console.log("Optimization Check: JSON Size before upload", JSON.stringify(dataToUpload).length);
+
+      // --- MULAI PROSES PUBLISH ---
+
       // 1. Upload Master JSON ke IPFS
+      // SEKARANG JSON ini akan SANGAT KECIL (hanya berisi text dan link ipfs://)
+      // Waktu upload harusnya < 2 detik.
       const masterCID = await uploadJsonToApi(dataToUpload);
       console.log("Master CID didapat:", masterCID);
 
       // 2. COBA PUBLISH VIA GASLESS (RAG SYSTEM)
       let txHash = "";
-      let isGaslessSuccess = false;
 
       try {
         const gaslessResponse = await fetch('/api/user/publish-gasless', {
@@ -708,7 +823,6 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         const gaslessResult = await gaslessResponse.json();
 
         if (gaslessResponse.status === 402) {
-           // TANGKAP KONDISI SALDO HABIS
            throw new Error("RAG_INSUFFICIENT_FUNDS");
         }
 
@@ -716,26 +830,21 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
            throw new Error(gaslessResult.error || "Gasless API Error");
         }
 
-        // Jika sukses gasless
         txHash = gaslessResult.txHash;
-        isGaslessSuccess = true;
         alert(`Sukses! Update via Gasless RAG.\nSisa Budget: ${gaslessResult.remainingBudget} ETH`);
 
       } catch (gaslessError: any) {
-        // 3. LOGIKA FALLBACK (JIKA GASLESS GAGAL)
-        
+        // 3. LOGIKA FALLBACK (MANUAL)
         if (gaslessError.message === "RAG_INSUFFICIENT_FUNDS") {
-           // Beritahu user
            const proceedManual = confirm(
              "⚠️ Saldo RAG/Budget Anda habis.\n\nSistem akan beralih menggunakan Wallet pribadi Anda (Gas berbayar).\nLanjutkan?"
            );
 
            if (!proceedManual) {
              setIsPublishing(false);
-             return; // User membatalkan
+             return; 
            }
 
-           // Eksekusi Manual (Fallback)
            console.log("Switching to manual wallet execution...");
            txHash = await writeContractAsync({
               address: USER_PROFILE_CONTRACT_ADDRESS,
@@ -745,15 +854,13 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
            });
            
            alert("Sukses! Profil diperbarui menggunakan Wallet Pribadi.");
-
         } else {
-           // Jika errornya bukan karena saldo (misal server down), tetap lempar error
            throw gaslessError;
         }
       }
 
-      // 4. Update Database Lokal (Vercel KV) agar sinkron
-      // Langkah ini dijalankan baik via Gasless maupun Manual
+      // 4. Update Database Lokal (KV)
+      // Ini juga akan sangat cepat sekarang karena JSON-nya kecil
       await fetch('/api/user/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

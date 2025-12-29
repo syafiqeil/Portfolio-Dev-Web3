@@ -12,6 +12,17 @@ import React, {
 import { useAnimationStore, Project } from "@/app/lib/useAnimationStore";
 import { resolveIpfsUrl } from "@/app/lib/utils";
 
+// --- DAFTAR TECH STACK POPULER ---
+const POPULAR_TAGS = [
+  "TypeScript", "JavaScript", "React", "Next.js", "Node.js", 
+  "Tailwind CSS", "HTML", "CSS", "Python", "Django", "Flask",
+  "Rust", "Go (Golang)", "C", "C++", "C#", ".NET",
+  "PHP", "Laravel", "CodeIgniter", "Ruby", "Ruby on Rails",
+  "Java", "Spring Boot", "Kotlin", "Swift", "Flutter", "React Native",
+  "SQL", "PostgreSQL", "MySQL", "MongoDB", "Firebase", "Supabase",
+  "GraphQL", "Docker", "Kubernetes", "AWS", "Web3", "Solidity", "Ethers.js"
+];
+
 // --- ICONS ---
 const PlusIcon = () => (
   <svg
@@ -125,7 +136,10 @@ export default function ProjectsSettingsPage() {
 
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
-
+  const [videoDuration, setVideoDuration] = useState<number>(0);
+  const [trimStart, setTrimStart] = useState<number>(0);
+  const [trimEnd, setTrimEnd] = useState<number>(0);
+  const [isOverLimit, setIsOverLimit] = useState(false);
   const [videoThumbPreview, setVideoThumbPreview] = useState<string | null>(
     null
   );
@@ -185,22 +199,41 @@ export default function ProjectsSettingsPage() {
       videoElement.preload = "metadata";
       videoElement.onloadedmetadata = function () {
         window.URL.revokeObjectURL(videoElement.src);
-        // @ts-ignore
-        if (videoElement.duration > 180) {
-          alert("Video duration must be under 3 minutes.");
-          setVideoFile(null);
-          setVideoPreview(null);
+        const duration = videoElement.duration;
+        
+        setVideoDuration(duration);
+        
+        // LOGIKA DINAMIS:
+        // Jika durasi > 180 detik (3 menit), tandai sebagai over limit
+        // Tapi JANGAN tolak/setVideoFile(null). Biarkan user mengedit.
+        if (duration > 180) {
+          setIsOverLimit(true);
+          setTrimStart(0);
+          setTrimEnd(180); // Default set ke 3 menit pertama
+          alert("Video is longer than 3 minutes. Please trim it in the settings below.");
         } else {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setVideoPreview(reader.result as string);
-            setVideoFile(file);
-          };
-          reader.readAsDataURL(file);
+          setIsOverLimit(false);
+          setTrimStart(0);
+          setTrimEnd(duration);
         }
+
+        // Lanjut load preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setVideoPreview(reader.result as string);
+          setVideoFile(file);
+        };
+        reader.readAsDataURL(file);
       };
       videoElement.src = URL.createObjectURL(file);
     }
+  };
+
+  // Helper untuk konversi detik ke format MM:SS (untuk UI)
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   const removeVideo = () => {
@@ -225,14 +258,25 @@ export default function ProjectsSettingsPage() {
   };
 
   // --- UTILS FORM ---
+  const addTag = () => {
+    const trimmed = currentTag.trim();
+    if (!trimmed) return;
+    
+    // Cek duplikasi (case-insensitive opsional, di sini strict)
+    if (!tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+    }
+    setCurrentTag("");
+  };
+
   const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && currentTag.trim()) {
-      e.preventDefault();
-      if (!tags.includes(currentTag.trim()))
-        setTags([...tags, currentTag.trim()]);
-      setCurrentTag("");
+    // Tangkap Enter agar tidak submit form
+    if (e.key === "Enter") {
+      e.preventDefault(); 
+      addTag();
     }
   };
+
   const removeTag = (t: string) => setTags(tags.filter((tag) => tag !== t));
 
   const resetForm = () => {
@@ -257,6 +301,10 @@ export default function ProjectsSettingsPage() {
     e.preventDefault();
     if (!name) return alert("Project name cannot be empty.");
 
+    if (videoFile && (trimEnd - trimStart > 180)) {
+      return alert(`Selected video range (${formatTime(trimEnd - trimStart)}) exceeds 3 minutes limit.`);
+    }
+
     const existingProject = editingId
       ? projects.find((p) => p.id === editingId)
       : null;
@@ -274,6 +322,10 @@ export default function ProjectsSettingsPage() {
       videoUrl: videoPreview,
       videoThumbnail: videoThumbPreview,
 
+      // Simpan data trimming
+      videoStartTime: trimStart,
+      videoEndTime: trimEnd,
+
       // File mentah untuk diupload saat Publish
       pendingGalleryFiles: galleryFiles.length > 0 ? galleryFiles : undefined,
       pendingVideoFile: videoFile,
@@ -282,6 +334,7 @@ export default function ProjectsSettingsPage() {
       // Jaga field legacy agar tidak error
       mediaPreview: existingProject?.mediaPreview || null,
       mediaIpfsUrl: existingProject?.mediaIpfsUrl || null,
+
     };
 
     if (editingId) {
@@ -305,6 +358,12 @@ export default function ProjectsSettingsPage() {
     setGalleryPreviews(project.gallery || []);
     setVideoPreview(project.videoUrl || null);
     setVideoThumbPreview(project.videoThumbnail || null);
+
+    // Load trimming data (default 0 jika belum ada)
+    setTrimStart(project.videoStartTime || 0);
+    setTrimEnd(project.videoEndTime || 0);
+    setVideoDuration(0); // Reset duration karena kita tidak load file asli
+    setIsOverLimit(false);
 
     // Reset file inputs karena kita sedang edit data yang sudah ada
     setGalleryFiles([]);
@@ -451,6 +510,58 @@ export default function ProjectsSettingsPage() {
                       Remove
                     </button>
                   </div>
+
+                  {/* UI Pengaturan Durasi (Muncul untuk semua video, atau hanya yg overlimit) */}
+                  <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-md">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-semibold text-zinc-700">Video Settings</span>
+                      <span className={`text-xs ${trimEnd - trimStart > 180 ? 'text-red-600 font-bold' : 'text-green-600'}`}>
+                        Duration: {formatTime(trimEnd - trimStart)} / 3:00 Max
+                      </span>
+                    </div>
+
+                    {isOverLimit && (
+                      <div className="flex gap-4 items-center text-sm">
+                        <div className="flex flex-col gap-1 flex-1">
+                          <label className="text-xs text-zinc-500">Start Time</label>
+                          <input 
+                            type="range" 
+                            min={0} 
+                            max={videoDuration} 
+                            value={trimStart}
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              setTrimStart(val);
+                              // Auto adjust End agar tetap valid (opsional)
+                              if (trimEnd - val > 180) setTrimEnd(val + 180);
+                            }}
+                            className="w-full"
+                          />
+                          <span className="text-xs font-mono">{formatTime(trimStart)}</span>
+                        </div>
+
+                        <div className="flex flex-col gap-1 flex-1">
+                          <label className="text-xs text-zinc-500">End Time</label>
+                          <input 
+                            type="range" 
+                            min={trimStart} 
+                            max={videoDuration} 
+                            value={trimEnd}
+                            onChange={(e) => setTrimEnd(Number(e.target.value))}
+                            className="w-full"
+                          />
+                          <span className="text-xs font-mono">{formatTime(trimEnd)}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {isOverLimit && (
+                      <p className="text-[10px] text-zinc-400 mt-2">
+                        *Video asli akan diupload penuh, namun hanya bagian yang dipilih yang akan ditampilkan.
+                      </p>
+                    )}
+                  </div>
+
                   {/* Thumbnail Video Input */}
                   <div className="flex items-center gap-3 mt-1 p-2 bg-zinc-50 rounded-md border border-zinc-200">
                     <div className="w-10 h-10 bg-zinc-200 rounded overflow-hidden flex-shrink-0">
@@ -512,9 +623,10 @@ export default function ProjectsSettingsPage() {
             />
           </div>
 
+          {/* --- TAGS (FIXED & IMPROVED) --- */}
           <div>
             <label className="text-sm font-medium text-zinc-700">Tags</label>
-            <div className="flex flex-wrap items-center gap-2 mt-1 w-full rounded-md border border-zinc-300 px-3 py-2">
+            <div className="flex flex-wrap items-center gap-2 mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 bg-white">
               {tags.map((tag) => (
                 <span
                   key={tag}
@@ -526,15 +638,40 @@ export default function ProjectsSettingsPage() {
                   </button>
                 </span>
               ))}
-              <input
-                type="text"
-                value={currentTag}
-                onChange={(e) => setCurrentTag(e.target.value)}
-                onKeyDown={handleTagInput}
-                placeholder="Add tag..."
-                className="flex-1 text-sm focus:outline-none"
-              />
+              
+              <div className="flex flex-1 min-w-[120px] items-center gap-2">
+                <input
+                  list="tech-stacks" // Connect to Datalist
+                  type="text"
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  onKeyDown={handleTagInput}
+                  placeholder="Add tag (Type or Select)..."
+                  className="flex-1 text-sm focus:outline-none"
+                />
+                
+                {/* Manual Add Button */}
+                <button 
+                  type="button" 
+                  onClick={addTag}
+                  disabled={!currentTag.trim()}
+                  className="text-zinc-400 hover:text-zinc-600 disabled:opacity-30"
+                  title="Add Tag"
+                >
+                  <PlusIcon />
+                </button>
+              </div>
+
+              {/* Datalist Definition */}
+              <datalist id="tech-stacks">
+                {POPULAR_TAGS.map((tech) => (
+                  <option key={tech} value={tech} />
+                ))}
+              </datalist>
             </div>
+            <p className="text-[10px] text-zinc-400 mt-1">
+              Press Enter or click (+) to add. Select from list or type your own.
+            </p>
           </div>
 
           <div className="flex justify-end gap-2 mt-2">
@@ -557,7 +694,7 @@ export default function ProjectsSettingsPage() {
         </form>
       </section>
 
-      {/* --- LIST SECTION (RESTORED) --- */}
+      {/* --- LIST SECTION --- */}
       <section>
         <h2 className="text-lg font-medium text-zinc-800 mb-3">
           Featured Projects (Max. 3)
