@@ -450,6 +450,7 @@ export default function ProjectsSettingsPage() {
                       src={resolveIpfsUrl(src)}
                       alt={`Gal ${idx}`}
                       className="w-full h-full object-cover"
+                      crossOrigin="anonymous"
                     />
                     <button
                       type="button"
@@ -501,6 +502,7 @@ export default function ProjectsSettingsPage() {
                       src={resolveIpfsUrl(videoPreview)}
                       className="w-full h-full object-contain"
                       controls
+                      crossOrigin="anonymous"
                     />
                     <button
                       type="button"
@@ -569,6 +571,7 @@ export default function ProjectsSettingsPage() {
                         <img
                           src={resolveIpfsUrl(videoThumbPreview)}
                           className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[8px] text-zinc-400">

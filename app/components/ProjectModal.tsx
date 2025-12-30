@@ -101,7 +101,7 @@ export const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-white shadow-t">
+        <div className="flex-1 overflow-y-auto p-6 bg-white rounded-b-lg shadow-t">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Kiri: Deskripsi */}
             <div className="flex-1">

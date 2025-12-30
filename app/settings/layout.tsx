@@ -33,26 +33,44 @@ const NavLink = ({
 
 // --- Komponen Indikator Status ---
 const PublishStatus = () => {
-  const { isPublishing, hasUnpublishedChanges, isHydrated } =
-    useAnimationStore();
+  const { 
+    isPublishing, 
+    hasUnpublishedChanges, 
+    isHydrated,
+    uploadProgress,
+  } = useAnimationStore();
 
+  // 1. Prioritas Tertinggi: Sedang Upload File Tertentu
+  if (uploadProgress) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-blue-600 animate-pulse font-medium">
+        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        {uploadProgress}
+      </div>
+    );
+  }
+
+  // 2. Status Publishing General (Smart Contract / DB)
   if (isPublishing) {
-    return <span className="text-sm text-yellow-600">Publishing...</span>;
+    return <span className="text-sm text-yellow-600 font-medium">Finalizing Transaction...</span>;
   }
 
   if (hasUnpublishedChanges) {
     return (
-      <span className="text-sm text-blue-600">
-        Local changes are not published yet.
+      <span className="text-sm text-zinc-500 italic">
+        Unsaved changes on-chain.
       </span>
     );
   }
 
   if (isHydrated) {
-    return <span className="text-sm text-green-600">✔ Synced</span>;
+    return <span className="text-sm text-green-600 font-medium flex items-center gap-1">✔ Synced On-Chain</span>;
   }
 
-  return <span className="text-sm text-zinc-500">Loading...</span>;
+  return <span className="text-sm text-zinc-400">Loading...</span>;
 };
 
 export default function SettingsLayout({

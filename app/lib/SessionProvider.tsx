@@ -354,6 +354,7 @@ interface SessionContextType {
   hasUnpublishedChanges: boolean;
   isPublishing: boolean;
   publishChangesToOnChain: () => Promise<void>;
+  uploadProgress: string;
 
   activeAnimation: string;
   setActiveAnimation: (anim: string) => Promise<void>;
@@ -496,6 +497,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [isPublishing, setIsPublishing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   const { writeContractAsync } = useWriteContract();
 
   // --- LOGIKA CEK SESI AWAL ---
@@ -648,33 +650,79 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const setActiveAnimation = useCallback(async (newAnimation: string) => {
     saveDraft({ animation: newAnimation });
   }, [saveDraft]);
+
   const activeAnimation = profile?.animation || DEFAULTS.animation;
+  
+  // Direct Upload
   const uploadFileToApi = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch('/api/upload', { method: 'POST', body: formData });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Server error /api/upload:", errorText);
-      throw new Error(`Failed to upload file (${response.status}). Server: ${errorText}`);
+    setUploadProgress(`Uploading ${file.name}...`); // Update status UI
+    
+    try {
+      // 1. Minta Kunci Sementara dari Server kita
+      const keyRes = await fetch("/api/pinata/key");
+      if (!keyRes.ok) throw new Error("Gagal mendapatkan izin upload.");
+      const { JWT } = await keyRes.json();
+
+      // 2. Siapkan Form Data untuk Pinata
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      // Opsional: Tambah metadata agar rapi di dashboard Pinata
+      const metadata = JSON.stringify({ name: file.name });
+      formData.append("pinataMetadata", metadata);
+      const options = JSON.stringify({ cidVersion: 1 });
+      formData.append("pinataOptions", options);
+
+      // 3. UPLOAD LANGSUNG KE PINATA (Bypass Server Next.js)
+      const uploadRes = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${JWT}`, // Pakai kunci sementara
+        },
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error(`Pinata Upload Failed: ${uploadRes.statusText}`);
+      }
+
+      const result = await uploadRes.json();
+      setUploadProgress(""); // Clear status
+      return result.IpfsHash;
+
+    } catch (error) {
+      console.error("Direct Upload Error:", error);
+      setUploadProgress("Upload Error!");
+      throw error;
     }
-    const data = await response.json();
-    return data.ipfsHash;
   };
   
+  // Fungsi Upload JSON Langsung
   const uploadJsonToApi = async (data: object): Promise<string> => {
-    const response = await fetch('/api/upload-json', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Server error /api/upload-json:", errorText);
-      throw new Error(`Failed to upload JSON (${response.status}). Server: ${errorText}`);
+    setUploadProgress("Uploading Metadata JSON...");
+    try {
+        // Sama seperti file, minta kunci dulu
+        const keyRes = await fetch("/api/pinata/key");
+        const { JWT } = await keyRes.json();
+
+        const uploadRes = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${JWT}`,
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!uploadRes.ok) throw new Error("Pinata JSON Upload Failed");
+        
+        const result = await uploadRes.json();
+        setUploadProgress("");
+        return result.IpfsHash;
+    } catch (e) {
+        setUploadProgress("JSON Upload Error!");
+        throw e;
     }
-    const result = await response.json();
-    return result.ipfsHash;
   };
 
   const publishChangesToOnChain = useCallback(async () => {
@@ -919,6 +967,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     addExtension,
     isHydrated: !isLoading && !isProfileLoading, 
     isPublishing,
+    uploadProgress,
     publishChangesToOnChain,
     hasUnpublishedChanges, 
 
