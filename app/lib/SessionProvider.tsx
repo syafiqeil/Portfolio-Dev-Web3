@@ -354,6 +354,7 @@ interface SessionContextType {
   hasUnpublishedChanges: boolean;
   isPublishing: boolean;
   publishChangesToOnChain: () => Promise<void>;
+  uploadFileToApi: (file: File) => Promise<string>;
   uploadProgress: string;
 
   activeAnimation: string;
@@ -967,9 +968,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     addExtension,
     isHydrated: !isLoading && !isProfileLoading, 
     isPublishing,
-    uploadProgress,
     publishChangesToOnChain,
-    hasUnpublishedChanges, 
+    hasUnpublishedChanges,
+    uploadFileToApi, 
+    uploadProgress,
 
     // Fungsi internal
     _setProfile: setProfile,

@@ -175,66 +175,80 @@ const ActivityCard = () => {
               Latest Blog
             </h3>
 
-            {blogPosts.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {blogPosts.slice(0, 3).map((post) => {
-                  const rawText =
-                    post.description ||
-                    post.content ||
-                    "No description available.";
-                  const previewText =
-                    rawText.length > 120
-                      ? rawText.substring(0, 120) + "..."
-                      : rawText;
+            <div className="flex flex-col gap-4">
+              {/* Render Existing Blogs */}
+              {blogPosts.slice(0, 3).map((post) => {
+                const rawText =
+                  post.description ||
+                  post.content ||
+                  "No description available.";
+                const previewText =
+                  rawText.length > 120
+                    ? rawText.substring(0, 120) + "..."
+                    : rawText;
 
-                  return (
-                    <Link
-                      key={post.id}
-                      href={`/blog/${post.id}`}
-                      className="group flex gap-4 p-4 border rounded-md hover:bg-zinc-100 transition-all items-start shadow-sm"
-                    >
-                      <div className="w-20 h-20 flex-shrink-0 bg-zinc-100 overflow-hidden transition-colors border border-zinc-200 group-hover:border-zinc-700 rounded-md">
-                        {(() => {
-                          const imgSrc = resolveIpfsUrl(post.coverImage);
-                          return imgSrc ? (
-                            <img
-                              src={imgSrc}
-                              alt={post.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[10px]">
-                              No Img
-                            </div>
-                          );
-                        })()}
-                      </div>
+                return (
+                  <Link
+                    key={post.id}
+                    href={`/blog/${post.id}`}
+                    className="group flex gap-4 p-4 border rounded-md hover:bg-zinc-100 transition-all items-start shadow-sm"
+                  >
+                    <div className="w-20 h-20 flex-shrink-0 bg-zinc-100 overflow-hidden transition-colors border border-zinc-200 group-hover:border-zinc-700 rounded-md">
+                      {(() => {
+                        const imgSrc = resolveIpfsUrl(post.coverImage);
+                        return imgSrc ? (
+                          <img
+                            src={imgSrc}
+                            alt={post.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-zinc-300 text-[10px]">
+                            No Img
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-                      <div className="flex flex-col min-w-0 h-full justify-between">
-                        <div>
-                          {post.date && (
-                            <div className="flex items-center gap-1 text-[10px] text-zinc-400 group-hover:text-black transition-colors mb-1">
-                              <CalendarIcon />
-                              <span>{post.date}</span>
-                            </div>
-                          )}
-                          <h4 className="font-semibold text-zinc-900 group-hover:text-sky-600 transition-colors text-sm leading-tight line-clamp-1 mb-1">
-                            {post.title || "Untitled"}
-                          </h4>
-                        </div>
-                        <p className="text-xs text-zinc-500 line-clamp-3 leading-relaxed">
-                          {previewText}
-                        </p>
+                    <div className="flex flex-col min-w-0 h-full justify-between">
+                      <div>
+                        {post.date && (
+                          <div className="flex items-center gap-1 text-[10px] text-zinc-400 group-hover:text-black transition-colors mb-1">
+                            <CalendarIcon />
+                            <span>{post.date}</span>
+                          </div>
+                        )}
+                        <h4 className="font-semibold text-zinc-900 group-hover:text-sky-600 transition-colors text-sm leading-tight line-clamp-1 mb-1">
+                          {post.title || "Untitled"}
+                        </h4>
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="h-24 border border-dashed border-zinc-200 bg-zinc-100/50 rounded-md flex items-center justify-center text-zinc-400 text-xs">
-                No blogs posted yet.
-              </div>
-            )}
+                      <p className="text-xs text-zinc-500 line-clamp-3 leading-relaxed">
+                        {previewText}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+
+              {/* Render Placeholders if less than 3 blogs */}
+              {Array.from({ length: Math.max(0, 3 - blogPosts.length) }).map(
+                (_, i) => (
+                  <div
+                    key={`empty-blog-${i}`}
+                    className="h-28 w-full rounded-md border border-dashed border-zinc-200 bg-zinc-50/30 flex items-center gap-4 p-4"
+                  >
+                    <div className="w-20 h-20 flex-shrink-0 rounded-md bg-zinc-100/50 flex items-center justify-center border border-zinc-100">
+                      <span className="text-zinc-300 text-[10px]">Empty</span>
+                    </div>
+                    <div className="flex flex-col gap-2 flex-1 justify-center">
+                      <div className="h-3 w-24 bg-zinc-100 rounded-full" />
+                      <div className="h-2 w-full bg-zinc-100 rounded-full opacity-60" />
+                      <div className="h-2 w-2/3 bg-zinc-100 rounded-full opacity-60" />
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
           </div>
 
           {/* --- 2. CERTIFICATES --- */}

@@ -52,14 +52,14 @@ export default function BlogDetailPage() {
 
       <article className="max-w-3xl mx-auto px-4 py-12">
         {/* Header Artikel */}
-        <header className="mb-4 border-b border-zinc-100 pb-4e">
+        <header className="mb-10 border-b border-zinc-100 pb-4e">
           <h1 className="text-3xl md:text-5xl font-bold text-zinc-900 mb-4 leading-tight tracking-tight">
             {post.title}
           </h1>
           
           {/* Tanggal (Metadata) */}
           {post.date && (
-            <div className="flex items-center gap-2 text-zinc-500 text-sm font-medium">
+            <div className="flex items-center gap-2 text-zinc-500 mb-4 text-sm font-medium">
               <CalendarIcon />
               <span>Published on {post.date}</span>
             </div>
