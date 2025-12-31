@@ -128,8 +128,8 @@ const OrbsAnimation = () => (
 const SettingsIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -213,7 +213,7 @@ const ProfileCard = ({ profile }: { profile: Profile | null }) => {
     return (
       <Link
         href="/settings/profile"
-        className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 transition-all hover:bg-white/40"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-all hover:bg-white/40"
         aria-label="Animation Settings"
       >
         <SettingsIcon />
